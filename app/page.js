@@ -1,579 +1,513 @@
 "use client";
 import { useState } from "react";
 
-const gold = "#F5C518";
-const navy = "#0a0f1e";
-const card = "#111827";
-const cardBorder = "#1f2937";
-const blue = "#3B82F6";
-const green = "#10B981";
-const red = "#EF4444";
-const muted = "#6B7280";
-const white = "#F9FAFB";
-
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: `linear-gradient(135deg, #0a0f1e 0%, #0d1b2a 50%, #0f172a 100%)`,
-    color: white,
-    fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
-    padding: "0 0 80px 0",
-  },
-  header: {
-    background: `linear-gradient(180deg, rgba(245,197,24,0.08) 0%, transparent 100%)`,
-    borderBottom: `1px solid ${cardBorder}`,
-    padding: "48px 24px 40px",
-    textAlign: "center",
-  },
-  badge: {
-    display: "inline-block",
-    background: `linear-gradient(90deg, ${gold}, #e6a800)`,
-    color: "#000",
-    fontWeight: 800,
-    fontSize: "11px",
-    letterSpacing: "2px",
-    padding: "4px 14px",
-    borderRadius: "20px",
-    marginBottom: "16px",
-    textTransform: "uppercase",
-  },
-  title: {
-    fontSize: "clamp(32px, 6vw, 64px)",
-    fontWeight: 900,
-    margin: "0 0 8px",
-    background: `linear-gradient(90deg, ${white}, ${gold})`,
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    lineHeight: 1.1,
-  },
-  subtitle: {
-    fontSize: "clamp(14px, 2vw, 18px)",
-    color: muted,
-    margin: 0,
-    letterSpacing: "0.5px",
-  },
-  container: {
-    maxWidth: "1100px",
-    margin: "0 auto",
-    padding: "0 16px",
-  },
-  sectionTitle: {
-    fontSize: "clamp(20px, 3vw, 26px)",
-    fontWeight: 800,
-    color: white,
-    margin: "0 0 8px",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-  },
-  sectionSub: {
-    color: muted,
-    fontSize: "14px",
-    margin: "0 0 24px",
-  },
-  card: {
-    background: card,
-    border: `1px solid ${cardBorder}`,
-    borderRadius: "16px",
-    padding: "24px",
-    boxShadow: "0 4px 24px rgba(0,0,0,0.4)",
-  },
-  section: {
-    marginTop: "48px",
-  },
-  goldLine: {
-    width: "40px",
-    height: "3px",
-    background: `linear-gradient(90deg, ${gold}, transparent)`,
-    borderRadius: "2px",
-    marginBottom: "24px",
-  },
+// ── Organic Palette ──────────────────────────────────────────────
+const C = {
+  bg:        "#0f1a0e",
+  bgCard:    "#162014",
+  bgDeep:    "#0b130a",
+  border:    "#2a3d28",
+  sage:      "#7aad6e",
+  moss:      "#4a7a40",
+  fern:      "#2d5e25",
+  earth:     "#8b6b47",
+  sand:      "#c9aa82",
+  cream:     "#e8dfc8",
+  bark:      "#3d2e1a",
+  muted:     "#6b8264",
+  white:     "#f0ede6",
+  red:       "#c0392b",
+  amber:     "#c97d30",
+  teal:      "#3d8b7a",
 };
 
-function ProgressBar({ label, value, max, unit, color = blue, icon }) {
-  const pct = Math.min(100, Math.round((value / max) * 100));
+const font = {
+  display: "'Georgia', 'Times New Roman', serif",
+  body: "'Palatino Linotype', 'Book Antiqua', Georgia, serif",
+  mono: "'Courier New', monospace",
+};
+
+// ── Reusable Components ──────────────────────────────────────────
+function ProgressRing({ pct, color, size = 80, label, value, unit }) {
+  const r = (size - 10) / 2;
+  const circ = 2 * Math.PI * r;
+  const dash = (pct / 100) * circ;
   return (
-    <div style={{ marginBottom: "20px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-        <span style={{ fontSize: "14px", color: white, fontWeight: 600 }}>
-          {icon} {label}
-        </span>
-        <span style={{ fontSize: "13px", color: gold, fontWeight: 700 }}>
-          {value} / {max} {unit}
-        </span>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={C.border} strokeWidth={8} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={8}
+          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
+          style={{ transition: "stroke-dasharray 0.8s ease" }} />
+      </svg>
+      <div style={{ textAlign: "center", marginTop: "-4px" }}>
+        <div style={{ fontFamily: font.display, fontSize: "13px", color: color, fontWeight: "bold" }}>{value}{unit}</div>
+        <div style={{ fontFamily: font.body, fontSize: "11px", color: C.muted }}>{label}</div>
       </div>
-      <div style={{ background: "#1f2937", borderRadius: "8px", height: "10px", overflow: "hidden" }}>
-        <div
-          style={{
-            width: `${pct}%`,
-            height: "100%",
-            background: `linear-gradient(90deg, ${color}, ${color}aa)`,
-            borderRadius: "8px",
-            transition: "width 0.5s ease",
-          }}
-        />
-      </div>
-      <div style={{ textAlign: "right", fontSize: "11px", color: muted, marginTop: "4px" }}>{pct}%</div>
     </div>
   );
 }
 
-function InputField({ label, value, onChange, unit, min, max, step = 1 }) {
+function GreenBar({ pct, color }) {
   return (
-    <div style={{ marginBottom: "16px" }}>
-      <label style={{ display: "block", fontSize: "13px", color: muted, marginBottom: "6px", fontWeight: 600 }}>
-        {label}
+    <div style={{ background: C.bgDeep, borderRadius: "20px", height: "8px", overflow: "hidden", border: `1px solid ${C.border}` }}>
+      <div style={{ width: `${Math.min(100, pct)}%`, height: "100%", background: `linear-gradient(90deg, ${color}, ${color}99)`, borderRadius: "20px", transition: "width 0.8s ease" }} />
+    </div>
+  );
+}
+
+function InputField({ label, value, onChange, unit, min, max, step = 1, icon }) {
+  return (
+    <div style={{ marginBottom: "14px" }}>
+      <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: C.muted, fontFamily: font.body, marginBottom: "5px", letterSpacing: "0.5px", textTransform: "uppercase" }}>
+        <span>{icon}</span>{label}
       </label>
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <input
-          type="number"
-          value={value}
-          min={min}
-          max={max}
-          step={step}
-          onChange={(e) => onChange(Number(e.target.value))}
-          style={{
-            flex: 1,
-            background: "#1f2937",
-            border: `1px solid ${cardBorder}`,
-            borderRadius: "10px",
-            padding: "10px 14px",
-            color: white,
-            fontSize: "16px",
-            fontWeight: 700,
-            outline: "none",
-            width: "100%",
-          }}
-        />
-        <span style={{ color: muted, fontSize: "13px", minWidth: "36px" }}>{unit}</span>
+        <input type="number" value={value} min={min} max={max} step={step}
+          onChange={e => onChange(Number(e.target.value))}
+          style={{ flex: 1, background: C.bgDeep, border: `1px solid ${C.border}`, borderRadius: "10px", padding: "10px 14px", color: C.cream, fontSize: "16px", fontWeight: "700", fontFamily: font.display, outline: "none", width: "100%" }} />
+        <span style={{ color: C.muted, fontSize: "12px", fontFamily: font.body, minWidth: "36px" }}>{unit}</span>
       </div>
     </div>
   );
 }
 
+function Card({ children, style = {}, accent }) {
+  return (
+    <div style={{
+      background: C.bgCard,
+      border: `1px solid ${C.border}`,
+      borderRadius: "18px",
+      padding: "22px",
+      boxShadow: "0 4px 28px rgba(0,0,0,0.5)",
+      borderLeft: accent ? `3px solid ${accent}` : undefined,
+      ...style,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+function SectionTitle({ icon, title, sub }) {
+  return (
+    <div style={{ marginBottom: "22px" }}>
+      <h2 style={{ fontFamily: font.display, fontSize: "clamp(20px, 3vw, 26px)", fontWeight: "bold", color: C.cream, margin: "0 0 4px", display: "flex", alignItems: "center", gap: "10px" }}>
+        <span>{icon}</span>{title}
+      </h2>
+      {sub && <p style={{ fontFamily: font.body, fontSize: "13px", color: C.muted, margin: 0, paddingLeft: "36px" }}>{sub}</p>}
+      <div style={{ width: "48px", height: "2px", background: `linear-gradient(90deg, ${C.sage}, transparent)`, borderRadius: "2px", marginTop: "10px", marginLeft: "36px" }} />
+    </div>
+  );
+}
+
+function NavButton({ label, icon, active, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      flex: 1,
+      background: active ? `linear-gradient(135deg, ${C.fern}, ${C.moss})` : C.bgDeep,
+      border: `1px solid ${active ? C.moss : C.border}`,
+      borderRadius: "14px",
+      padding: "14px 8px",
+      color: active ? C.cream : C.muted,
+      fontFamily: font.display,
+      fontWeight: active ? "bold" : "normal",
+      fontSize: "clamp(12px, 2vw, 14px)",
+      cursor: "pointer",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: "4px",
+      transition: "all 0.3s ease",
+      boxShadow: active ? `0 4px 16px ${C.fern}55` : "none",
+    }}>
+      <span style={{ fontSize: "20px" }}>{icon}</span>
+      {label}
+    </button>
+  );
+}
+
+// ── Data ─────────────────────────────────────────────────────────
 const workoutWeeks = [
   {
-    week: "Week 1–2",
-    theme: "Foundation & Activation",
+    week: "Week 1–2", theme: "Foundation & Gentle Activation",
     days: [
-      { day: "Monday", name: "Brisk Walking", icon: "🚶", details: "30 min brisk walk outdoors or treadmill, flat surface, moderate pace", link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
-      { day: "Tuesday", name: "Upper Body Strength", icon: "💪", details: "Seated dumbbell press, lateral raises, bicep curls, tricep extensions – 3 sets x 12 reps", link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
-      { day: "Wednesday", name: "Core & Mobility", icon: "🧘", details: "Dead bugs, bird dogs, planks (20s), hip circles, seated stretches – 3 rounds", link: "https://www.youtube.com/watch?v=AnYl6Nk9GOA" },
-      { day: "Thursday", name: "Stationary Bike Rehab", icon: "🚴", details: "Low resistance, 25 min at comfortable pace – zero knee strain protocol", link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
-      { day: "Friday", name: "Upper Body + Core", icon: "🏋️", details: "Push-ups (modified), dumbbell rows, shoulder press, Russian twists – 3 sets x 10", link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
-      { day: "Saturday", name: "Long Walk", icon: "🌤️", details: "45 min light walk, focus on breathing and posture", link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
-      { day: "Sunday", name: "Rest & Recovery", icon: "😴", details: "Full rest, light stretching, foam rolling calves and upper back", link: "" },
+      { day: "Monday",    icon: "🚶", name: "Brisk Walk",         details: "30 min flat walk, moderate pace, focus on posture",           link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
+      { day: "Tuesday",   icon: "💪", name: "Upper Body",         details: "Seated dumbbell press, lateral raises, curls — 3×12",         link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
+      { day: "Wednesday", icon: "🧘", name: "Core & Mobility",    details: "Dead bugs, bird dogs, planks 20s, hip circles — 3 rounds",    link: "https://www.youtube.com/watch?v=AnYl6Nk9GOA" },
+      { day: "Thursday",  icon: "🚴", name: "Bike Rehab",         details: "25 min low resistance stationary bike — zero knee strain",     link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
+      { day: "Friday",    icon: "🏋️", name: "Upper + Core",      details: "Push-ups (modified), dumbbell rows, Russian twists — 3×10",   link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
+      { day: "Saturday",  icon: "🌿", name: "Long Walk",          details: "45 min light outdoor walk, enjoy nature",                     link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
+      { day: "Sunday",    icon: "😴", name: "Rest & Recovery",    details: "Full rest, light stretching, foam roll upper back",            link: "" },
     ],
   },
   {
-    week: "Week 3–4",
-    theme: "Momentum Building",
+    week: "Week 3–4", theme: "Momentum Building",
     days: [
-      { day: "Monday", name: "Incline Treadmill", icon: "📈", details: "35 min, 4–6% incline, moderate pace – great for glutes and cardio without knee stress", link: "https://www.youtube.com/watch?v=O9RMnVsSwgo" },
-      { day: "Tuesday", name: "Upper Body Power", icon: "💥", details: "Dumbbell chest press, cable rows, lat pulldowns, skull crushers – 4 sets x 10", link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
-      { day: "Wednesday", name: "Core Blast", icon: "🔥", details: "Plank holds (30s), reverse crunches, mountain climbers (slow), leg raises – 4 rounds", link: "https://www.youtube.com/watch?v=AnYl6Nk9GOA" },
-      { day: "Thursday", name: "Bike + Mobility", icon: "🚴", details: "30 min bike, then 15 min mobility: hip flexor stretch, hamstring stretch, thoracic rotation", link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
-      { day: "Friday", name: "Full Upper Body", icon: "🏋️", details: "Arnold press, pull-aparts, face pulls, dips (assisted), curls – 3 sets x 12", link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
-      { day: "Saturday", name: "Outdoor Walk / Hike", icon: "🏞️", details: "50 min outdoor walk or gentle nature hike on flat terrain", link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
-      { day: "Sunday", name: "Active Recovery", icon: "🛁", details: "Yoga flow, light stretching, contrast shower, 8+ hours sleep target", link: "https://www.youtube.com/watch?v=v7AYKMP6rOE" },
+      { day: "Monday",    icon: "📈", name: "Incline Treadmill",  details: "35 min, 4–6% incline, builds glutes without knee stress",     link: "https://www.youtube.com/watch?v=O9RMnVsSwgo" },
+      { day: "Tuesday",   icon: "💥", name: "Upper Body Power",   details: "Chest press, cable rows, lat pulldowns, skull crushers 4×10", link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
+      { day: "Wednesday", icon: "🔥", name: "Core Blast",         details: "Plank 30s, reverse crunches, mountain climbers (slow) 4 rds", link: "https://www.youtube.com/watch?v=AnYl6Nk9GOA" },
+      { day: "Thursday",  icon: "🚴", name: "Bike + Mobility",    details: "30 min bike + 15 min hip flexor & hamstring stretches",       link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
+      { day: "Friday",    icon: "🏋️", name: "Full Upper Body",   details: "Arnold press, face pulls, dips (assisted), curls — 3×12",     link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
+      { day: "Saturday",  icon: "🏞️", name: "Nature Walk/Hike",  details: "50 min outdoor flat terrain hike or park walk",               link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
+      { day: "Sunday",    icon: "🛁", name: "Active Recovery",    details: "Yoga flow, contrast shower, target 8h sleep",                 link: "https://www.youtube.com/watch?v=v7AYKMP6rOE" },
     ],
   },
   {
-    week: "Week 5–6",
-    theme: "Fat Burn Acceleration",
+    week: "Week 5–6", theme: "Fat Burn Acceleration",
     days: [
-      { day: "Monday", name: "Incline Intervals", icon: "⚡", details: "40 min: alternate 3 min at 5% incline, 1 min at 8% incline – interval cardio", link: "https://www.youtube.com/watch?v=O9RMnVsSwgo" },
-      { day: "Tuesday", name: "Push Day", icon: "💪", details: "Chest press, shoulder press, incline push-ups, lateral raises, tricep pushdowns – 4x12", link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
-      { day: "Wednesday", name: "Core + Cardio Circuit", icon: "🔄", details: "3 rounds: 1 min plank, 20 reverse crunches, 20 seated twists, 10 min bike", link: "https://www.youtube.com/watch?v=AnYl6Nk9GOA" },
-      { day: "Thursday", name: "Pull Day", icon: "🏋️", details: "Lat pulldown, seated cable row, face pulls, hammer curls, rear delt fly – 4x10", link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
-      { day: "Friday", name: "Bike + Core", icon: "🚴", details: "35 min bike moderate pace, then 20 min targeted core work", link: "https://www.youtube.com/watch?v=AnYl6Nk9GOA" },
-      { day: "Saturday", name: "Long Walk + Stretch", icon: "🌿", details: "60 min brisk walk, followed by 15 min full-body stretching routine", link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
-      { day: "Sunday", name: "Rest", icon: "😴", details: "Complete rest. Prep meals for the week. Journaling and mindset work.", link: "" },
+      { day: "Monday",    icon: "⚡", name: "Incline Intervals",  details: "40 min: 3 min 5% / 1 min 8% alternating incline cardio",     link: "https://www.youtube.com/watch?v=O9RMnVsSwgo" },
+      { day: "Tuesday",   icon: "💪", name: "Push Day",           details: "Chest press, shoulder press, incline push-ups, triceps 4×12", link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
+      { day: "Wednesday", icon: "🔄", name: "Core + Cardio",      details: "3 rds: 1 min plank, 20 crunches, 20 twists, 10 min bike",    link: "https://www.youtube.com/watch?v=AnYl6Nk9GOA" },
+      { day: "Thursday",  icon: "🏋️", name: "Pull Day",          details: "Lat pulldown, cable row, face pulls, hammer curls 4×10",     link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
+      { day: "Friday",    icon: "🚴", name: "Bike + Core",        details: "35 min bike + 20 min targeted core work",                    link: "https://www.youtube.com/watch?v=AnYl6Nk9GOA" },
+      { day: "Saturday",  icon: "🌿", name: "Long Walk + Stretch", details: "60 min brisk walk + 15 min full-body stretch",              link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
+      { day: "Sunday",    icon: "😴", name: "Rest",               details: "Complete rest. Prep meals. Journal your progress.",           link: "" },
     ],
   },
   {
-    week: "Week 7–8",
-    theme: "Peak & Consolidation",
+    week: "Week 7–8", theme: "Peak & Consolidation",
     days: [
-      { day: "Monday", name: "Incline Power Walk", icon: "🏔️", details: "45 min, 6–8% incline, fast pace – maximum calorie burn cardio session", link: "https://www.youtube.com/watch?v=O9RMnVsSwgo" },
-      { day: "Tuesday", name: "Upper Body Strength Max", icon: "🏆", details: "Heavy dumbbell work: chest, back, shoulders superset – 4 sets x 8-10 reps", link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
-      { day: "Wednesday", name: "Core Endurance", icon: "🔥", details: "5 rounds: 45s plank, 15 leg raises, 20 bicycle crunches, 30s rest", link: "https://www.youtube.com/watch?v=AnYl6Nk9GOA" },
-      { day: "Thursday", name: "Bike HIIT", icon: "⚡", details: "30 min: 1 min hard, 2 min easy intervals on stationary bike", link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
-      { day: "Friday", name: "Full Body Upper", icon: "💥", details: "Compound movements: rows, press, pull, curl, extend – full circuit 4 rounds", link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
-      { day: "Saturday", name: "Victory Walk", icon: "🎯", details: "60+ min outdoor walk, celebrate your progress, take progress photos", link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
-      { day: "Sunday", name: "Reflect & Reset", icon: "✨", details: "Yoga, meditation, meal prep for next phase, measure results", link: "https://www.youtube.com/watch?v=v7AYKMP6rOE" },
+      { day: "Monday",    icon: "🏔️", name: "Power Walk",        details: "45 min, 6–8% incline, fast pace — max calorie burn",         link: "https://www.youtube.com/watch?v=O9RMnVsSwgo" },
+      { day: "Tuesday",   icon: "🏆", name: "Strength Max",       details: "Heavy dumbbell: chest, back, shoulders superset 4×8-10",     link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
+      { day: "Wednesday", icon: "🔥", name: "Core Endurance",     details: "5 rds: 45s plank, 15 leg raises, 20 bicycle crunches",       link: "https://www.youtube.com/watch?v=AnYl6Nk9GOA" },
+      { day: "Thursday",  icon: "⚡", name: "Bike HIIT",          details: "30 min: 1 min hard / 2 min easy intervals on bike",          link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
+      { day: "Friday",    icon: "💥", name: "Full Body Upper",    details: "Compound: rows, press, pull, curl, extend — 4 circuit rds",  link: "https://www.youtube.com/watch?v=vc1E5CfRfos" },
+      { day: "Saturday",  icon: "🎯", name: "Victory Walk",       details: "60+ min outdoor walk — take progress photos!",               link: "https://www.youtube.com/watch?v=njeZ29umqVE" },
+      { day: "Sunday",    icon: "✨", name: "Reflect & Reset",    details: "Yoga, meditation, meal prep, measure your results",          link: "https://www.youtube.com/watch?v=v7AYKMP6rOE" },
     ],
   },
 ];
 
 const meals = [
   {
-    meal: "Breakfast",
-    icon: "🌅",
-    name: "Protein Oats Bowl",
-    calories: 420,
-    protein: 32,
-    carbs: 45,
-    fat: 10,
-    ingredients: ["80g rolled oats", "1 scoop vanilla protein powder", "200ml almond milk", "1 banana", "1 tbsp almond butter", "Cinnamon to taste"],
-    instructions: "Cook oats in almond milk for 5 min. Stir in protein powder off heat. Top with sliced banana and almond butter. Sprinkle cinnamon.",
-    videoLink: "https://www.youtube.com/watch?v=kd3goxFqbJA",
+    meal: "Breakfast", icon: "🌅", name: "Protein Oats Bowl",
+    calories: 420, protein: 32, carbs: 45, fat: 10,
+    ingredients: ["80g rolled oats", "1 scoop vanilla protein", "200ml almond milk", "1 banana", "1 tbsp almond butter", "Cinnamon"],
+    instructions: "Cook oats in almond milk 5 min. Off heat, stir in protein. Top with sliced banana, almond butter, cinnamon.",
+    video: "https://www.youtube.com/watch?v=kd3goxFqbJA",
   },
   {
-    meal: "Lunch",
-    icon: "☀️",
-    name: "Grilled Chicken & Quinoa Bowl",
-    calories: 520,
-    protein: 48,
-    carbs: 42,
-    fat: 12,
-    ingredients: ["180g chicken breast", "80g quinoa (dry)", "100g cherry tomatoes", "50g cucumber", "30g feta cheese", "Olive oil, lemon, oregano"],
-    instructions: "Season chicken with oregano, salt, pepper. Grill 6 min per side. Cook quinoa per package. Assemble bowl with veggies, crumble feta, drizzle olive oil and lemon.",
-    videoLink: "https://www.youtube.com/watch?v=mbGpI2XNHFQ",
+    meal: "Lunch", icon: "☀️", name: "Grilled Chicken & Quinoa Bowl",
+    calories: 520, protein: 48, carbs: 42, fat: 12,
+    ingredients: ["180g chicken breast", "80g quinoa", "100g cherry tomatoes", "50g cucumber", "30g feta", "Olive oil, lemon, oregano"],
+    instructions: "Season chicken, grill 6 min per side. Cook quinoa. Assemble bowl with veggies, feta, drizzle oil and lemon.",
+    video: "https://www.youtube.com/watch?v=mbGpI2XNHFQ",
   },
   {
-    meal: "Dinner",
-    icon: "🌙",
-    name: "Baked Salmon & Roasted Veg",
-    calories: 480,
-    protein: 44,
-    carbs: 22,
-    fat: 22,
-    ingredients: ["200g salmon fillet", "150g broccoli", "100g sweet potato", "2 cloves garlic", "Olive oil", "Lemon, dill, salt, pepper"],
-    instructions: "Preheat oven 200°C. Toss broccoli and sweet potato in olive oil, season. Roast 20 min. Add salmon to pan, top with garlic, lemon, dill. Bake 12–15 min until flaky.",
-    videoLink: "https://www.youtube.com/watch?v=M_a_HcNADP4",
+    meal: "Dinner", icon: "🌙", name: "Baked Salmon & Roasted Veg",
+    calories: 480, protein: 44, carbs: 22, fat: 22,
+    ingredients: ["200g salmon fillet", "150g broccoli", "100g sweet potato", "2 garlic cloves", "Olive oil", "Lemon, dill"],
+    instructions: "200°C oven. Roast veg 20 min. Add salmon with garlic, lemon, dill. Bake 12–15 min until flaky.",
+    video: "https://www.youtube.com/watch?v=M_a_HcNADP4",
   },
   {
-    meal: "Snack 1",
-    icon: "🍎",
-    name: "Greek Yogurt & Berries",
-    calories: 180,
-    protein: 18,
-    carbs: 20,
-    fat: 3,
-    ingredients: ["200g Greek yogurt (0% fat)", "80g mixed berries", "1 tsp honey", "1 tbsp chia seeds"],
-    instructions: "Layer yogurt in a bowl. Top with berries, drizzle honey, sprinkle chia seeds. Can be prepped the night before.",
-    videoLink: "https://www.youtube.com/watch?v=xGrC_vHH3oU",
+    meal: "Snack 1", icon: "🍎", name: "Greek Yogurt & Berries",
+    calories: 180, protein: 18, carbs: 20, fat: 3,
+    ingredients: ["200g Greek yogurt 0%", "80g mixed berries", "1 tsp honey", "1 tbsp chia seeds"],
+    instructions: "Layer yogurt in bowl. Top with berries, honey, chia seeds. Can prep night before.",
+    video: "https://www.youtube.com/watch?v=xGrC_vHH3oU",
   },
   {
-    meal: "Snack 2",
-    icon: "🥜",
-    name: "Protein Shake & Almonds",
-    calories: 220,
-    protein: 26,
-    carbs: 8,
-    fat: 10,
-    ingredients: ["1 scoop chocolate protein powder", "250ml water or almond milk", "20g raw almonds"],
-    instructions: "Shake protein with liquid. Serve with almonds on the side. Great post-workout or evening snack to hit protein goals.",
-    videoLink: "https://www.youtube.com/watch?v=Yz4hDgk_3iU",
+    meal: "Snack 2", icon: "🥜", name: "Protein Shake & Almonds",
+    calories: 220, protein: 26, carbs: 8, fat: 10,
+    ingredients: ["1 scoop chocolate protein", "250ml almond milk", "20g raw almonds"],
+    instructions: "Shake protein with liquid. Pair with almonds. Great post-workout or evening snack.",
+    video: "https://www.youtube.com/watch?v=Yz4hDgk_3iU",
   },
 ];
 
 const quotes = [
   { text: "The body achieves what the mind believes.", author: "Napoleon Hill" },
   { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
-  { text: "Don't wish for it. Work for it.", author: "Unknown" },
-  { text: "Your only limit is you.", author: "Unknown" },
-  { text: "Push yourself because no one else is going to do it for you.", author: "Unknown" },
-  { text: "Great things never come from comfort zones.", author: "Unknown" },
+  { text: "Nature does not hurry, yet everything is accomplished.", author: "Lao Tzu" },
+  { text: "Take care of your body. It's the only place you have to live.", author: "Jim Rohn" },
+  { text: "Every day is a new beginning. Take a deep breath and start again.", author: "Unknown" },
 ];
 
-export default function PandoApp() {
+// ── HOME VIEW ────────────────────────────────────────────────────
+function HomeView() {
   const [weight, setWeight] = useState(90);
-  const [steps, setSteps] = useState(5000);
-  const [water, setWater] = useState(1.5);
-  const [sleep, setSleep] = useState(6);
-  const [expandedWeek, setExpandedWeek] = useState(0);
-  const [expandedMeal, setExpandedMeal] = useState(null);
-  const [quoteIdx, setQuoteIdx] = useState(0);
+  const [steps, setSteps]   = useState(5000);
+  const [water, setWater]   = useState(1.5);
+  const [sleep, setSleep]   = useState(6);
+  const [qIdx, setQIdx]     = useState(0);
 
-  const goalWeight = 80;
-  const startWeight = 98;
-  const weightLost = Math.max(0, startWeight - weight);
-  const weightGoal = startWeight - goalWeight;
+  const startW = 98, goalW = 80;
+  const weightGoal = startW - goalW;
+  const weightLost = Math.max(0, startW - weight);
+  const behind = weight > startW - (weightGoal / 8) * 2;
 
-  const behind = weight > startWeight - (weightGoal / 8) * 2;
+  const totalCal   = meals.reduce((a, m) => a + m.calories, 0);
+  const totalProt  = meals.reduce((a, m) => a + m.protein, 0);
 
   return (
-    <div style={styles.page}>
-      {/* HEADER */}
-      <div style={styles.header}>
-        <div style={styles.badge}>🔥 Premium Fitness Dashboard</div>
-        <h1 style={styles.title}>PANDO APP</h1>
-        <p style={{ fontSize: "clamp(18px, 3vw, 28px)", fontWeight: 700, color: gold, margin: "0 0 8px" }}>
-          2-Month Transformation Dashboard
-        </p>
-        <p style={styles.subtitle}>8 Weeks · Knee-Safe · Fat Loss · Strength Building</p>
-      </div>
-
-      <div style={styles.container}>
-
-        {/* PROGRESS TRACKER */}
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>📊 Live Progress Tracker</div>
-          <div style={styles.goldLine} />
-          {behind && (
-            <div style={{ background: "rgba(239,68,68,0.1)", border: `1px solid ${red}`, borderRadius: "12px", padding: "14px 18px", marginBottom: "20px", display: "flex", gap: "10px", alignItems: "center" }}>
-              <span style={{ fontSize: "20px" }}>⚠️</span>
-              <span style={{ color: "#fca5a5", fontSize: "14px", fontWeight: 600 }}>Weight loss may be behind schedule. Review your nutrition and increase daily movement.</span>
-            </div>
-          )}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "20px" }}>
-            <div style={styles.card}>
-              <div style={{ fontWeight: 700, color: gold, marginBottom: "16px", fontSize: "15px" }}>📝 Log Today</div>
-              <InputField label="Current Weight" value={weight} onChange={setWeight} unit="kg" min={50} max={200} step={0.5} />
-              <InputField label="Daily Steps" value={steps} onChange={setSteps} unit="steps" min={0} max={20000} step={100} />
-              <InputField label="Water Intake" value={water} onChange={setWater} unit="L" min={0} max={5} step={0.1} />
-              <InputField label="Sleep Hours" value={sleep} onChange={setSleep} unit="hrs" min={0} max={12} step={0.5} />
-            </div>
-            <div style={styles.card}>
-              <div style={{ fontWeight: 700, color: gold, marginBottom: "16px", fontSize: "15px" }}>📈 Progress Overview</div>
-              <ProgressBar label="Weight Lost" value={weightLost} max={weightGoal} unit="kg" color={green} icon="⚖️" />
-              <ProgressBar label="Daily Steps" value={steps} max={10000} unit="steps" color={blue} icon="👟" />
-              <ProgressBar label="Water Intake" value={water} max={3} unit="L" color="#06B6D4" icon="💧" />
-              <ProgressBar label="Sleep" value={sleep} max={8} unit="hrs" color="#8B5CF6" icon="😴" />
-              <div style={{ marginTop: "16px", padding: "12px", background: "#1f2937", borderRadius: "10px", display: "flex", justifyContent: "space-between" }}>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ color: gold, fontWeight: 800, fontSize: "22px" }}>{weightLost.toFixed(1)}</div>
-                  <div style={{ color: muted, fontSize: "11px" }}>kg lost</div>
-                </div>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ color: blue, fontWeight: 800, fontSize: "22px" }}>{weightGoal - weightLost > 0 ? (weightGoal - weightLost).toFixed(1) : 0}</div>
-                  <div style={{ color: muted, fontSize: "11px" }}>kg to go</div>
-                </div>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ color: green, fontWeight: 800, fontSize: "22px" }}>{Math.round((weightLost / weightGoal) * 100)}%</div>
-                  <div style={{ color: muted, fontSize: "11px" }}>complete</div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div>
+      {/* Warning */}
+      {behind && (
+        <div style={{ background: `${C.amber}18`, border: `1px solid ${C.amber}66`, borderRadius: "14px", padding: "14px 18px", marginBottom: "20px", display: "flex", gap: "10px", alignItems: "center" }}>
+          <span style={{ fontSize: "20px" }}>🍂</span>
+          <span style={{ color: C.sand, fontSize: "13px", fontFamily: font.body }}>Weight progress may be behind schedule. Review your nutrition and increase daily movement.</span>
         </div>
+      )}
 
-        {/* KNEE SAFETY */}
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>🦵 Knee Safety Protocol</div>
-          <div style={styles.goldLine} />
-          <div style={{ background: "rgba(245,197,24,0.06)", border: `1px solid ${gold}44`, borderRadius: "16px", padding: "24px" }}>
-            <div style={{ fontWeight: 700, color: gold, fontSize: "16px", marginBottom: "16px" }}>⚠️ Important Knee Guidelines – Follow at ALL Times</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
-              {[
-                { icon: "🚫", label: "No Deep Squats", desc: "Avoid any squat below 90°. No full squats ever." },
-                { icon: "🚫", label: "No Jumping", desc: "Zero impact jumping. No jump squats, burpees, or box jumps." },
-                { icon: "🚫", label: "Stop at Sharp Pain", desc: "Any sharp knee pain = stop immediately. Rest and ice." },
-                { icon: "✅", label: "Use Bike & Walk", desc: "Low-impact cardio only. Bike and walking are your best friends." },
-                { icon: "✅", label: "Warm Up Always", desc: "5–10 min light movement before every session." },
-                { icon: "✅", label: "Ice After Exercise", desc: "10–15 min ice pack on knees after intense sessions." },
-              ].map((item, i) => (
-                <div key={i} style={{ background: "#111827", border: `1px solid ${cardBorder}`, borderRadius: "12px", padding: "14px" }}>
-                  <div style={{ fontSize: "22px", marginBottom: "6px" }}>{item.icon}</div>
-                  <div style={{ fontWeight: 700, fontSize: "13px", color: item.icon === "✅" ? green : red, marginBottom: "4px" }}>{item.label}</div>
-                  <div style={{ fontSize: "12px", color: muted }}>{item.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Rings Row */}
+      <Card style={{ marginBottom: "20px" }}>
+        <div style={{ fontFamily: font.display, fontWeight: "bold", color: C.sage, fontSize: "14px", marginBottom: "16px", letterSpacing: "0.5px" }}>🌿 Today's Vitals</div>
+        <div style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap", gap: "12px" }}>
+          <ProgressRing pct={Math.min(100,(weightLost/weightGoal)*100)} color={C.sage}   size={80} label="kg lost"  value={weightLost.toFixed(1)} unit="kg" />
+          <ProgressRing pct={Math.min(100,(steps/10000)*100)}           color={C.earth}  size={80} label="steps"    value={steps}                  unit="" />
+          <ProgressRing pct={Math.min(100,(water/3)*100)}               color={C.teal}   size={80} label="hydration" value={water}                 unit="L" />
+          <ProgressRing pct={Math.min(100,(sleep/8)*100)}               color={C.moss}   size={80} label="sleep"    value={sleep}                  unit="h" />
         </div>
+      </Card>
 
-        {/* WORKOUT PLAN */}
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>🏋️ 8-Week Workout Plan</div>
-          <div style={styles.goldLine} />
-          <p style={styles.sectionSub}>Tap a week to expand. All workouts are knee-safe and progressive.</p>
-          {workoutWeeks.map((wk, wi) => (
-            <div key={wi} style={{ ...styles.card, marginBottom: "12px", padding: 0, overflow: "hidden" }}>
-              <button
-                onClick={() => setExpandedWeek(expandedWeek === wi ? -1 : wi)}
-                style={{
-                  width: "100%",
-                  background: expandedWeek === wi ? "rgba(245,197,24,0.08)" : "transparent",
-                  border: "none",
-                  padding: "20px 24px",
-                  cursor: "pointer",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  color: white,
-                }}
-              >
-                <div style={{ textAlign: "left" }}>
-                  <div style={{ fontWeight: 800, fontSize: "16px", color: gold }}>{wk.week}</div>
-                  <div style={{ fontSize: "13px", color: muted }}>{wk.theme}</div>
-                </div>
-                <span style={{ color: gold, fontSize: "20px", transform: expandedWeek === wi ? "rotate(180deg)" : "none", transition: "transform 0.3s" }}>▼</span>
-              </button>
-              {expandedWeek === wi && (
-                <div style={{ padding: "0 16px 16px" }}>
-                  {wk.days.map((day, di) => (
-                    <div key={di} style={{ background: "#0d1117", border: `1px solid ${cardBorder}`, borderRadius: "12px", padding: "14px 16px", marginBottom: "8px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "8px" }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 700, fontSize: "14px", color: gold, marginBottom: "2px" }}>{day.icon} {day.day}</div>
-                          <div style={{ fontWeight: 700, fontSize: "15px", color: white, marginBottom: "4px" }}>{day.name}</div>
-                          <div style={{ fontSize: "13px", color: muted }}>{day.details}</div>
-                        </div>
-                        {day.link && (
-                          <a
-                            href={day.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              background: red,
-                              color: white,
-                              fontWeight: 700,
-                              fontSize: "12px",
-                              padding: "6px 12px",
-                              borderRadius: "8px",
-                              textDecoration: "none",
-                              whiteSpace: "nowrap",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                            }}
-                          >
-                            ▶ Watch
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+      {/* Inputs */}
+      <Card style={{ marginBottom: "20px" }}>
+        <div style={{ fontFamily: font.display, fontWeight: "bold", color: C.sage, fontSize: "14px", marginBottom: "14px" }}>📝 Log Your Day</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+          <InputField label="Weight"   value={weight} onChange={setWeight} unit="kg"    min={50}  max={200} step={0.5} icon="⚖️" />
+          <InputField label="Steps"    value={steps}  onChange={setSteps}  unit="steps" min={0}   max={20000} step={100} icon="👟" />
+          <InputField label="Water"    value={water}  onChange={setWater}  unit="L"     min={0}   max={5}   step={0.1} icon="💧" />
+          <InputField label="Sleep"    value={sleep}  onChange={setSleep}  unit="hrs"   min={0}   max={12}  step={0.5} icon="🌙" />
+        </div>
+      </Card>
+
+      {/* Stats */}
+      <Card style={{ marginBottom: "20px" }}>
+        <div style={{ fontFamily: font.display, fontWeight: "bold", color: C.sage, fontSize: "14px", marginBottom: "14px" }}>🌱 Transformation Stats</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", marginBottom: "14px" }}>
+          {[
+            { label: "Lost",    value: weightLost.toFixed(1)+"kg", color: C.sage },
+            { label: "To Go",   value: Math.max(0,weightGoal-weightLost).toFixed(1)+"kg", color: C.earth },
+            { label: "Done",    value: Math.round((weightLost/weightGoal)*100)+"%", color: C.teal },
+          ].map((s,i) => (
+            <div key={i} style={{ background: C.bgDeep, borderRadius: "12px", padding: "12px", textAlign: "center", border: `1px solid ${C.border}` }}>
+              <div style={{ fontFamily: font.display, fontSize: "20px", fontWeight: "bold", color: s.color }}>{s.value}</div>
+              <div style={{ fontFamily: font.body, fontSize: "11px", color: C.muted }}>{s.label}</div>
             </div>
           ))}
         </div>
+        <div style={{ fontFamily: font.body, fontSize: "12px", color: C.muted, marginBottom: "6px" }}>Daily Calories Target</div>
+        <GreenBar pct={100} color={C.fern} />
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
+          <span style={{ fontFamily: font.mono, fontSize: "11px", color: C.sage }}>{totalCal} kcal / day</span>
+          <span style={{ fontFamily: font.mono, fontSize: "11px", color: C.earth }}>{totalProt}g protein</span>
+        </div>
+      </Card>
 
-        {/* FOOD PLAN */}
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>🥗 Fat-Loss Meal Plan</div>
-          <div style={styles.goldLine} />
-          <p style={styles.sectionSub}>High protein · Calorie controlled · Easy to prepare</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px" }}>
-            {meals.map((m, i) => (
-              <div key={i} style={{ ...styles.card, borderTop: `3px solid ${gold}` }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                  <div>
-                    <div style={{ fontSize: "11px", color: muted, fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase" }}>{m.icon} {m.meal}</div>
-                    <div style={{ fontWeight: 800, fontSize: "16px", color: white }}>{m.name}</div>
+      {/* Knee Safety */}
+      <Card style={{ marginBottom: "20px", background: `${C.bark}99`, border: `1px solid ${C.earth}55` }}>
+        <div style={{ fontFamily: font.display, fontWeight: "bold", color: C.sand, fontSize: "14px", marginBottom: "12px" }}>🦵 Knee Safety Protocol</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+          {[
+            { icon: "🚫", t: "No Deep Squats",  d: "Nothing below 90°", color: C.red },
+            { icon: "🚫", t: "No Jumping",       d: "Zero impact moves",  color: C.red },
+            { icon: "🚫", t: "Stop Sharp Pain",  d: "Rest & ice at once", color: C.red },
+            { icon: "✅", t: "Bike & Walk Only", d: "Low-impact always",  color: C.sage },
+            { icon: "✅", t: "Always Warm Up",   d: "5–10 min light move",color: C.sage },
+            { icon: "✅", t: "Ice After Session",d: "10–15 min ice pack", color: C.sage },
+          ].map((k,i) => (
+            <div key={i} style={{ background: C.bgDeep, borderRadius: "10px", padding: "10px", border: `1px solid ${C.border}` }}>
+              <div style={{ fontSize: "16px", marginBottom: "3px" }}>{k.icon}</div>
+              <div style={{ fontFamily: font.display, fontSize: "12px", fontWeight: "bold", color: k.color }}>{k.t}</div>
+              <div style={{ fontFamily: font.body, fontSize: "11px", color: C.muted }}>{k.d}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Motivation */}
+      <Card style={{ background: `linear-gradient(135deg, ${C.fern}22, ${C.bgCard})`, border: `1px solid ${C.sage}33`, textAlign: "center" }}>
+        <div style={{ fontFamily: font.display, fontSize: "clamp(16px,3vw,20px)", fontStyle: "italic", color: C.cream, lineHeight: 1.6, marginBottom: "12px" }}>
+          "{quotes[qIdx].text}"
+        </div>
+        <div style={{ fontFamily: font.body, fontSize: "13px", color: C.muted, marginBottom: "16px" }}>— {quotes[qIdx].author}</div>
+        <button onClick={() => setQIdx((qIdx+1)%quotes.length)} style={{ background: `linear-gradient(135deg, ${C.moss}, ${C.fern})`, color: C.cream, border: "none", borderRadius: "10px", padding: "9px 20px", fontFamily: font.body, fontSize: "13px", cursor: "pointer", fontWeight: "bold" }}>
+          🌿 Next Quote
+        </button>
+      </Card>
+    </div>
+  );
+}
+
+// ── WORKOUT VIEW ─────────────────────────────────────────────────
+function WorkoutView() {
+  const [openWeek, setOpenWeek] = useState(0);
+  return (
+    <div>
+      <SectionTitle icon="🏋️" title="8-Week Workout Plan" sub="Tap a week to expand · All exercises are knee-safe" />
+      {workoutWeeks.map((wk, wi) => (
+        <div key={wi} style={{ marginBottom: "10px", background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: "16px", overflow: "hidden" }}>
+          <button onClick={() => setOpenWeek(openWeek === wi ? -1 : wi)} style={{
+            width: "100%", background: openWeek === wi ? `linear-gradient(90deg, ${C.fern}33, transparent)` : "transparent",
+            border: "none", padding: "18px 20px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", color: C.cream,
+          }}>
+            <div style={{ textAlign: "left" }}>
+              <div style={{ fontFamily: font.display, fontWeight: "bold", fontSize: "15px", color: C.sage }}>{wk.week}</div>
+              <div style={{ fontFamily: font.body, fontSize: "12px", color: C.muted }}>{wk.theme}</div>
+            </div>
+            <span style={{ color: C.sage, fontSize: "18px", transform: openWeek === wi ? "rotate(180deg)" : "none", transition: "transform 0.3s" }}>▼</span>
+          </button>
+          {openWeek === wi && (
+            <div style={{ padding: "0 12px 12px" }}>
+              {wk.days.map((d, di) => (
+                <div key={di} style={{ background: C.bgDeep, border: `1px solid ${C.border}`, borderRadius: "12px", padding: "12px 14px", marginBottom: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: font.display, fontWeight: "bold", fontSize: "13px", color: C.sand }}>{d.icon} {d.day}</div>
+                    <div style={{ fontFamily: font.display, fontWeight: "bold", fontSize: "14px", color: C.cream, margin: "2px 0" }}>{d.name}</div>
+                    <div style={{ fontFamily: font.body, fontSize: "12px", color: C.muted }}>{d.details}</div>
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ color: gold, fontWeight: 800, fontSize: "20px" }}>{m.calories}</div>
-                    <div style={{ color: muted, fontSize: "11px" }}>calories</div>
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: "8px", marginBottom: "14px" }}>
-                  {[
-                    { label: "Protein", value: m.protein + "g", color: green },
-                    { label: "Carbs", value: m.carbs + "g", color: blue },
-                    { label: "Fat", value: m.fat + "g", color: gold },
-                  ].map((macro, j) => (
-                    <div key={j} style={{ flex: 1, background: "#1f2937", borderRadius: "8px", padding: "8px", textAlign: "center" }}>
-                      <div style={{ color: macro.color, fontWeight: 700, fontSize: "14px" }}>{macro.value}</div>
-                      <div style={{ color: muted, fontSize: "10px" }}>{macro.label}</div>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setExpandedMeal(expandedMeal === i ? null : i)}
-                  style={{ width: "100%", background: "#1f2937", border: `1px solid ${cardBorder}`, borderRadius: "8px", padding: "8px", color: white, cursor: "pointer", fontSize: "13px", fontWeight: 600, marginBottom: "10px" }}
-                >
-                  {expandedMeal === i ? "▲ Hide Details" : "▼ Show Ingredients & Instructions"}
-                </button>
-                {expandedMeal === i && (
-                  <div>
-                    <div style={{ marginBottom: "10px" }}>
-                      <div style={{ fontWeight: 700, color: gold, fontSize: "13px", marginBottom: "6px" }}>🧾 Ingredients</div>
-                      {m.ingredients.map((ing, k) => (
-                        <div key={k} style={{ fontSize: "13px", color: muted, padding: "2px 0" }}>• {ing}</div>
-                      ))}
-                    </div>
-                    <div style={{ marginBottom: "12px" }}>
-                      <div style={{ fontWeight: 700, color: gold, fontSize: "13px", marginBottom: "6px" }}>👨‍🍳 Instructions</div>
-                      <div style={{ fontSize: "13px", color: muted, lineHeight: "1.6" }}>{m.instructions}</div>
-                    </div>
-                  </div>
-                )}
-                <a
-                  href={m.videoLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    background: `linear-gradient(90deg, ${red}, #c0392b)`,
-                    color: white,
-                    fontWeight: 700,
-                    fontSize: "13px",
-                    padding: "10px",
-                    borderRadius: "10px",
-                    textDecoration: "none",
-                    width: "100%",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  ▶ Watch Cooking Video
-                </a>
-              </div>
-            ))}
-          </div>
-          <div style={{ ...styles.card, marginTop: "20px", background: "rgba(245,197,24,0.05)", border: `1px solid ${gold}33` }}>
-            <div style={{ fontWeight: 700, color: gold, marginBottom: "12px" }}>📊 Daily Totals</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-              {[
-                { label: "Total Calories", value: meals.reduce((a, m) => a + m.calories, 0) + " kcal", color: gold },
-                { label: "Total Protein", value: meals.reduce((a, m) => a + m.protein, 0) + "g", color: green },
-                { label: "Total Carbs", value: meals.reduce((a, m) => a + m.carbs, 0) + "g", color: blue },
-                { label: "Total Fat", value: meals.reduce((a, m) => a + m.fat, 0) + "g", color: "#F97316" },
-              ].map((t, i) => (
-                <div key={i} style={{ flex: "1 1 120px", background: "#1f2937", borderRadius: "10px", padding: "12px", textAlign: "center" }}>
-                  <div style={{ color: t.color, fontWeight: 800, fontSize: "20px" }}>{t.value}</div>
-                  <div style={{ color: muted, fontSize: "12px" }}>{t.label}</div>
+                  {d.link && (
+                    <a href={d.link} target="_blank" rel="noopener noreferrer" style={{ background: C.red, color: "#fff", fontWeight: "bold", fontSize: "11px", padding: "6px 12px", borderRadius: "8px", textDecoration: "none", whiteSpace: "nowrap" }}>
+                      ▶ Watch
+                    </a>
+                  )}
                 </div>
               ))}
             </div>
-          </div>
+          )}
         </div>
+      ))}
+    </div>
+  );
+}
 
-        {/* MOTIVATION */}
-        <div style={styles.section}>
-          <div style={styles.sectionTitle}>✨ Daily Motivation</div>
-          <div style={styles.goldLine} />
-          <div style={{ ...styles.card, background: `linear-gradient(135deg, rgba(245,197,24,0.08), rgba(59,130,246,0.05))`, border: `1px solid ${gold}33`, textAlign: "center", padding: "40px 24px" }}>
-            <div style={{ fontSize: "clamp(20px, 4vw, 32px)", fontWeight: 800, color: white, lineHeight: 1.4, marginBottom: "16px" }}>
-              "{quotes[quoteIdx].text}"
+// ── FOOD VIEW ────────────────────────────────────────────────────
+function FoodView() {
+  const [open, setOpen] = useState(null);
+  const totalCal  = meals.reduce((a,m) => a+m.calories, 0);
+  const totalProt = meals.reduce((a,m) => a+m.protein,  0);
+  const totalCarb = meals.reduce((a,m) => a+m.carbs,    0);
+  const totalFat  = meals.reduce((a,m) => a+m.fat,      0);
+
+  return (
+    <div>
+      <SectionTitle icon="🥗" title="Fat-Loss Meal Plan" sub="High protein · Calorie controlled · Easy to prepare" />
+
+      {/* Totals */}
+      <Card style={{ marginBottom: "20px" }}>
+        <div style={{ fontFamily: font.display, fontWeight: "bold", color: C.sage, fontSize: "13px", marginBottom: "12px" }}>📊 Daily Nutritional Totals</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px" }}>
+          {[
+            { l: "Calories", v: totalCal+"kcal", c: C.sand },
+            { l: "Protein",  v: totalProt+"g",   c: C.sage },
+            { l: "Carbs",    v: totalCarb+"g",   c: C.teal },
+            { l: "Fat",      v: totalFat+"g",    c: C.earth },
+          ].map((t,i) => (
+            <div key={i} style={{ background: C.bgDeep, borderRadius: "10px", padding: "10px 6px", textAlign: "center", border: `1px solid ${C.border}` }}>
+              <div style={{ fontFamily: font.display, fontSize: "14px", fontWeight: "bold", color: t.c }}>{t.v}</div>
+              <div style={{ fontFamily: font.body, fontSize: "10px", color: C.muted }}>{t.l}</div>
             </div>
-            <div style={{ color: gold, fontWeight: 600, fontSize: "14px", marginBottom: "24px" }}>— {quotes[quoteIdx].author}</div>
-            <button
-              onClick={() => setQuoteIdx((quoteIdx + 1) % quotes.length)}
-              style={{ background: `linear-gradient(90deg, ${gold}, #e6a800)`, color: "#000", fontWeight: 800, fontSize: "13px", padding: "10px 24px", borderRadius: "10px", border: "none", cursor: "pointer" }}
-            >
-              Next Quote →
-            </button>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px", marginTop: "16px" }}>
-            {[
-              { icon: "🎯", title: "Stay Consistent", desc: "80% consistency beats 100% perfection for 3 days." },
-              { icon: "📸", title: "Track Progress", desc: "Take weekly photos. The mirror lies, the camera doesn't." },
-              { icon: "🧠", title: "Mindset First", desc: "Your body transforms after your mind does." },
-              { icon: "🌙", title: "Sleep is Training", desc: "8 hours sleep = your body's repair workshop." },
-            ].map((tip, i) => (
-              <div key={i} style={{ ...styles.card, borderLeft: `3px solid ${gold}` }}>
-                <div style={{ fontSize: "24px", marginBottom: "8px" }}>{tip.icon}</div>
-                <div style={{ fontWeight: 700, fontSize: "14px", color: white, marginBottom: "4px" }}>{tip.title}</div>
-                <div style={{ fontSize: "13px", color: muted }}>{tip.desc}</div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Meals */}
+      {meals.map((m, i) => (
+        <div key={i} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: "16px", marginBottom: "12px", overflow: "hidden", borderTop: `3px solid ${C.moss}` }}>
+          <div style={{ padding: "16px 18px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+              <div>
+                <div style={{ fontFamily: font.body, fontSize: "11px", color: C.muted, textTransform: "uppercase", letterSpacing: "1px" }}>{m.icon} {m.meal}</div>
+                <div style={{ fontFamily: font.display, fontWeight: "bold", fontSize: "15px", color: C.cream }}>{m.name}</div>
               </div>
-            ))}
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontFamily: font.display, fontWeight: "bold", fontSize: "20px", color: C.sand }}>{m.calories}</div>
+                <div style={{ fontFamily: font.body, fontSize: "10px", color: C.muted }}>kcal</div>
+              </div>
+            </div>
+
+            {/* Macros */}
+            <div style={{ display: "flex", gap: "6px", marginBottom: "12px" }}>
+              {[
+                { l: "Protein", v: m.protein+"g", c: C.sage },
+                { l: "Carbs",   v: m.carbs+"g",   c: C.teal },
+                { l: "Fat",     v: m.fat+"g",     c: C.earth },
+              ].map((mc,j) => (
+                <div key={j} style={{ flex: 1, background: C.bgDeep, borderRadius: "8px", padding: "6px 4px", textAlign: "center" }}>
+                  <div style={{ fontFamily: font.mono, fontSize: "13px", fontWeight: "bold", color: mc.c }}>{mc.v}</div>
+                  <div style={{ fontFamily: font.body, fontSize: "9px", color: C.muted }}>{mc.l}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Toggle button */}
+            <button onClick={() => setOpen(open === i ? null : i)} style={{ width: "100%", background: C.bgDeep, border: `1px solid ${C.border}`, borderRadius: "8px", padding: "8px", color: C.muted, cursor: "pointer", fontFamily: font.body, fontSize: "12px", marginBottom: "10px" }}>
+              {open === i ? "▲ Hide Details" : "▼ Show Ingredients & Instructions"}
+            </button>
+
+            {/* Expanded */}
+            {open === i && (
+              <div style={{ marginBottom: "10px" }}>
+                <div style={{ fontFamily: font.display, fontWeight: "bold", color: C.sage, fontSize: "12px", marginBottom: "6px" }}>🌿 Ingredients</div>
+                {m.ingredients.map((ing, k) => (
+                  <div key={k} style={{ fontFamily: font.body, fontSize: "12px", color: C.muted, padding: "2px 0" }}>· {ing}</div>
+                ))}
+                <div style={{ fontFamily: font.display, fontWeight: "bold", color: C.sage, fontSize: "12px", margin: "10px 0 6px" }}>👨‍🍳 How to Prepare</div>
+                <div style={{ fontFamily: font.body, fontSize: "12px", color: C.muted, lineHeight: 1.6 }}>{m.instructions}</div>
+              </div>
+            )}
+
+            {/* Video Button */}
+            <a href={m.video} target="_blank" rel="noopener noreferrer" style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+              background: `linear-gradient(135deg, ${C.red}, #a93226)`,
+              color: "#fff", fontWeight: "bold", fontFamily: font.body,
+              fontSize: "13px", padding: "11px", borderRadius: "10px",
+              textDecoration: "none", width: "100%", boxSizing: "border-box",
+            }}>
+              ▶ Watch Cooking Video
+            </a>
           </div>
         </div>
+      ))}
+    </div>
+  );
+}
 
-        {/* FOOTER */}
-        <div style={{ textAlign: "center", marginTop: "60px", padding: "24px 0", borderTop: `1px solid ${cardBorder}` }}>
-          <div style={{ color: gold, fontWeight: 800, fontSize: "18px", marginBottom: "4px" }}>PANDO APP</div>
-          <div style={{ color: muted, fontSize: "13px" }}>Your 2-Month Transformation Journey · Stay Consistent · Trust the Process</div>
+// ── ROOT ─────────────────────────────────────────────────────────
+export default function PandoApp() {
+  const [view, setView] = useState("home");
+
+  return (
+    <div style={{ minHeight: "100vh", background: C.bg, color: C.white, fontFamily: font.body }}>
+
+      {/* Header */}
+      <div style={{
+        background: `linear-gradient(180deg, ${C.fern}22 0%, transparent 100%)`,
+        borderBottom: `1px solid ${C.border}`,
+        padding: "36px 20px 28px",
+        textAlign: "center",
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        {/* decorative rings */}
+        <div style={{ position: "absolute", top: "-30px", left: "-30px", width: "120px", height: "120px", borderRadius: "50%", border: `1px solid ${C.fern}33`, pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: "-20px", right: "-20px", width: "80px", height: "80px", borderRadius: "50%", border: `1px solid ${C.moss}33`, pointerEvents: "none" }} />
+        <div style={{ display: "inline-block", background: `linear-gradient(90deg, ${C.moss}, ${C.fern})`, color: C.cream, fontWeight: "bold", fontSize: "10px", letterSpacing: "2.5px", padding: "4px 14px", borderRadius: "20px", marginBottom: "12px", textTransform: "uppercase", fontFamily: font.body }}>
+          🌱 Organic Fitness Dashboard
         </div>
+        <h1 style={{ fontFamily: font.display, fontSize: "clamp(28px, 6vw, 52px)", fontWeight: "bold", margin: "0 0 6px", color: C.cream, letterSpacing: "-0.5px" }}>
+          PANDO APP
+        </h1>
+        <p style={{ fontFamily: font.display, fontSize: "clamp(13px, 2vw, 16px)", color: C.sage, margin: "0 0 4px", fontStyle: "italic" }}>
+          2-Month Transformation Dashboard
+        </p>
+        <p style={{ fontFamily: font.body, fontSize: "12px", color: C.muted, margin: 0 }}>8 Weeks · Knee-Safe · Fat Loss · Strength</p>
+      </div>
 
+      {/* Nav Tabs */}
+      <div style={{ display: "flex", gap: "10px", padding: "16px 16px 0", maxWidth: "680px", margin: "0 auto" }}>
+        <NavButton label="Progress"  icon="🌿" active={view === "home"}    onClick={() => setView("home")} />
+        <NavButton label="Workout"   icon="🏋️" active={view === "workout"} onClick={() => setView("workout")} />
+        <NavButton label="Food Plan" icon="🥗" active={view === "food"}    onClick={() => setView("food")} />
+      </div>
+
+      {/* Content */}
+      <div style={{ maxWidth: "680px", margin: "0 auto", padding: "20px 16px 80px" }}>
+        {view === "home"    && <HomeView />}
+        {view === "workout" && <WorkoutView />}
+        {view === "food"    && <FoodView />}
       </div>
     </div>
   );
