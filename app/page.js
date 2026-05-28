@@ -1,636 +1,755 @@
 "use client";
 import { useState } from "react";
 
-const GOLD = "#F5C842";
-const BLUE = "#3B82F6";
-const DARK = "#0A0A0F";
-const CARD = "#12121A";
-const CARD2 = "#1A1A26";
-const RED = "#EF4444";
-const GREEN = "#22C55E";
+const GOLD = "#F5C518";
+const DARK_BG = "#0a0b0e";
+const CARD_BG = "#111318";
+const CARD2 = "#161b22";
+const BORDER = "#1f2937";
+const BLUE = "#3b82f6";
+const GREEN = "#22c55e";
+const RED = "#ef4444";
+const ORANGE = "#f97316";
+const PURPLE = "#a855f7";
 
-function ProgressBar({ value, max, color = BLUE }) {
-  const pct = Math.min(100, Math.max(0, (value / max) * 100));
+const s = {
+  page: {
+    minHeight: "100vh",
+    background: "linear-gradient(135deg,#0a0b0e 0%,#0d1117 40%,#111827 100%)",
+    fontFamily: "'Segoe UI',system-ui,-apple-system,sans-serif",
+    color: "#fff",
+  },
+  header: {
+    background: "linear-gradient(180deg,#0a0b0e 0%,rgba(10,11,14,0.95) 100%)",
+    borderBottom: "1px solid #1f2937",
+    padding: "48px 24px 40px",
+    textAlign: "center",
+    position: "relative",
+    overflow: "hidden",
+  },
+  glow: {
+    position: "absolute", top: "-60px", left: "50%",
+    transform: "translateX(-50%)", width: "400px", height: "200px",
+    background: "radial-gradient(ellipse,rgba(245,197,24,0.12) 0%,transparent 70%)",
+    pointerEvents: "none",
+  },
+  title: {
+    fontSize: "clamp(36px,7vw,64px)", fontWeight: "800", letterSpacing: "-1px",
+    background: "linear-gradient(135deg,#F5C518 0%,#fff 60%,#F5C518 100%)",
+    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+    backgroundClip: "text", margin: "0 0 12px", lineHeight: 1.1,
+  },
+  subtitle: { fontSize: "clamp(14px,2.5vw,18px)", color: "#9ca3af", fontWeight: "400", letterSpacing: "2px", textTransform: "uppercase", margin: 0 },
+  badge: {
+    display: "inline-block", marginTop: "20px", padding: "8px 20px",
+    background: "linear-gradient(135deg,rgba(245,197,24,0.15),rgba(245,197,24,0.05))",
+    border: "1px solid rgba(245,197,24,0.3)", borderRadius: "100px",
+    fontSize: "12px", color: GOLD, fontWeight: "600", letterSpacing: "1px", textTransform: "uppercase",
+  },
+  wrap: { maxWidth: "1100px", margin: "0 auto", padding: "32px 16px 80px" },
+  secTitle: {
+    fontSize: "clamp(20px,4vw,28px)", fontWeight: "700", color: "#fff",
+    marginBottom: "20px", marginTop: "48px",
+    display: "flex", alignItems: "center", gap: "12px",
+  },
+  accent: {
+    width: "4px", height: "28px",
+    background: "linear-gradient(180deg,#F5C518,transparent)",
+    borderRadius: "2px", flexShrink: 0,
+  },
+  card: {
+    background: CARD_BG, border: "1px solid #1f2937", borderRadius: "16px",
+    padding: "24px", marginBottom: "16px",
+    boxShadow: "0 4px 24px rgba(0,0,0,0.4)",
+  },
+  grid2: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "16px" },
+  grid3: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "16px" },
+  input: {
+    width: "100%", background: CARD2, border: "1px solid #1f2937",
+    borderRadius: "10px", padding: "12px 16px", color: "#fff", fontSize: "16px",
+    outline: "none", boxSizing: "border-box", marginTop: "8px",
+  },
+  label: { fontSize: "12px", color: "#9ca3af", fontWeight: "600", letterSpacing: "0.5px", textTransform: "uppercase", display: "block" },
+  pBar: { height: "8px", borderRadius: "100px", background: CARD2, overflow: "hidden", marginTop: "8px" },
+  warnCard: {
+    background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)",
+    borderRadius: "14px", padding: "20px 24px", marginBottom: "16px",
+  },
+  goldCard: {
+    background: "linear-gradient(135deg,rgba(245,197,24,0.08),rgba(245,197,24,0.03))",
+    border: "1px solid rgba(245,197,24,0.2)", borderRadius: "16px",
+    padding: "24px", marginBottom: "16px",
+  },
+  btn: {
+    display: "inline-flex", alignItems: "center", gap: "8px",
+    padding: "10px 20px", borderRadius: "10px", border: "none",
+    cursor: "pointer", fontSize: "13px", fontWeight: "600",
+    textDecoration: "none", transition: "all 0.2s",
+  },
+  btnBlue: { background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff" },
+  btnGold: { background: "linear-gradient(135deg,#F5C518,#d97706)", color: "#000" },
+  mealCard: {
+    background: CARD_BG, border: "1px solid #1f2937", borderRadius: "16px",
+    padding: "24px", marginBottom: "16px", boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+  },
+  macroRow: { display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "12px", marginBottom: "12px" },
+  quoteCard: {
+    background: "linear-gradient(135deg,rgba(59,130,246,0.08),rgba(245,197,24,0.04))",
+    border: "1px solid rgba(59,130,246,0.2)", borderRadius: "16px",
+    padding: "28px", marginBottom: "16px", textAlign: "center",
+  },
+  accHdr: {
+    width: "100%", background: "none", border: "none",
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    cursor: "pointer", padding: 0, color: "#fff", fontSize: "16px", fontWeight: "600",
+  },
+  tag: {
+    display: "inline-block", padding: "3px 10px", borderRadius: "6px",
+    fontSize: "11px", fontWeight: "700",
+    background: "rgba(245,197,24,0.12)", color: GOLD,
+    border: "1px solid rgba(245,197,24,0.2)", marginRight: "6px", marginBottom: "4px",
+    textTransform: "uppercase", letterSpacing: "0.5px",
+  },
+};
+
+function macroBadge(color, text) {
   return (
-    <div style={{ background: "#1E1E2E", borderRadius: 999, height: 10, overflow: "hidden", marginTop: 6 }}>
-      <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 999, transition: "width 0.5s ease" }} />
+    <span style={{ padding: "4px 12px", borderRadius: "6px", fontSize: "12px", fontWeight: "700", background: color + "20", color, border: "1px solid " + color + "40" }}>
+      {text}
+    </span>
+  );
+}
+
+function ProgressBar({ label, current, target, unit, color }) {
+  const pct = target > 0 ? Math.max(0, (current / target) * 100) : 0;
+  return (
+    <div style={{ marginBottom: "16px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+        <span style={s.label}>{label}</span>
+        <span style={{ fontSize: "13px", color: pct >= 100 ? GREEN : "#9ca3af", fontWeight: "600" }}>
+          {current || 0} / {target} {unit}{" "}
+          <span style={{ color: pct >= 100 ? GREEN : GOLD }}>{Math.round(pct)}%</span>
+        </span>
+      </div>
+      <div style={s.pBar}>
+        <div style={{ height: "100%", width: Math.min(pct, 100) + "%", borderRadius: "100px", background: color, transition: "width 0.6s ease" }} />
+      </div>
     </div>
   );
 }
 
-function Card({ children, style }) {
+// ─── VERIFIED YOUTUBE LINKS ──────────────────────────────────────────────────
+// Cardio (fixed, every session):
+const BIKE_URL = "https://www.youtube.com/watch?v=YeHSHwBXbAU";        // 10 MIN BEGINNER INDOOR CYCLE - Sunny Health
+const ELLIP_URL = "https://www.youtube.com/watch?v=t9KVWTROVb0";       // Beginner Elliptical 10 Min Pyramid - Sunny Trainer Dana
+const TREAD_URL = "https://www.youtube.com/watch?v=yWLJhLKywW0";       // 20 Min Fat-Burning Incline Treadmill Walk Follow-Along
+
+// Chest-focus:
+const CHEST_FAT_URL = "https://www.youtube.com/watch?v=xLnsx4AYExs";   // How To Lose Chest Fat – 8 Best Dumbbell Exercises
+const CHEST_BENCH_URL = "https://www.youtube.com/watch?v=k6cFGQy7Usw"; // 20 Min Dumbbell Chest Workout Build & Burn
+const CHEST_ADV_URL = "https://www.youtube.com/watch?v=xvv_K1CeEEo";   // 25 Min Dumbbell Complete Chest Workout
+
+// Upper body:
+const UPPER_URL = "https://www.youtube.com/watch?v=hT5VD0zdiBc";       // 15 Min Upper Body Dumbbell (Arms,Chest,Back,Shoulders)
+const UPPER2_URL = "https://www.youtube.com/watch?v=xxVRCzT2a1E";      // 20 Min Full Upper Body Tone & Sculpt - MadFit
+
+// Core:
+const CORE_URL = "https://www.youtube.com/watch?v=eQdX2_k8FIM";        // 10 MIN BEGINNER TOTAL CORE WORKOUT
+const CORE2_URL = "https://www.youtube.com/watch?v=yTn4bJ29rrU";       // Abs Abs Abs 10 Min Core – Coach Todd
+
+// Knee:
+const KNEE_URL = "https://www.youtube.com/watch?v=cJCikne7iKM";        // 10 Min Knee Strengthening – Jessica Valant PT
+const KNEE2_URL = "https://www.youtube.com/watch?v=ysgbSkfGaYY";       // 10 MIN WORKOUT FOR KNEE STRENGTH – do 3x/week
+const KNEE_REHAB_URL = "https://www.youtube.com/watch?v=-6W03QOix3M";  // 20 Min Knee Strength Rehab – improve knee pain
+
+// Mobility:
+const MOB_URL = "https://www.youtube.com/watch?v=REL4y5a_xF8";         // 30 Min Flexibility + Stretching + Mobility Routine
+
+// Cardio session component shown at top of every day
+function CardioBlock() {
   return (
-    <div style={{ background: CARD, borderRadius: 20, padding: "24px 28px", boxShadow: "0 4px 40px rgba(0,0,0,0.5)", border: "1px solid #1E1E30", ...style }}>
-      {children}
+    <div style={{
+      background: "linear-gradient(135deg,rgba(59,130,246,0.10),rgba(168,85,247,0.06))",
+      border: "1px solid rgba(59,130,246,0.25)", borderRadius: "12px",
+      padding: "14px 18px", marginBottom: "12px",
+    }}>
+      <div style={{ fontSize: "11px", color: BLUE, fontWeight: "800", letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: "10px" }}>
+        🔥 DAILY CARDIO WARMUP — 40 MIN TOTAL
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+        <a href={BIKE_URL} target="_blank" rel="noopener noreferrer"
+          style={{ ...s.btn, background: "rgba(59,130,246,0.15)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.3)", fontSize: "12px", padding: "7px 14px" }}>
+          🚴 10 min Bike ▶
+        </a>
+        <a href={ELLIP_URL} target="_blank" rel="noopener noreferrer"
+          style={{ ...s.btn, background: "rgba(168,85,247,0.15)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.3)", fontSize: "12px", padding: "7px 14px" }}>
+          🔄 10 min Elliptical ▶
+        </a>
+        <a href={TREAD_URL} target="_blank" rel="noopener noreferrer"
+          style={{ ...s.btn, background: "rgba(34,197,94,0.12)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.25)", fontSize: "12px", padding: "7px 14px" }}>
+          🏃 20 min Incline Walk ▶
+        </a>
+      </div>
+      <div style={{ fontSize: "11px", color: "#6b7280", marginTop: "8px" }}>
+        Bike → Elliptical → Incline Treadmill Walk. Click each to follow along.
+      </div>
     </div>
   );
 }
 
-function SectionTitle({ children, icon }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-      <span style={{ fontSize: 28 }}>{icon}</span>
-      <h2 style={{ color: GOLD, fontSize: 22, fontWeight: 800, letterSpacing: 0.5, margin: 0 }}>{children}</h2>
-    </div>
-  );
-}
-
-// All YouTube links verified via web search May 2026
 const workoutWeeks = [
   {
-    week: "Week 1–2",
-    subtitle: "Foundation & Activation",
+    weeks: "Weeks 1–2", label: "Foundation — Chest Activation + Knee Rehab", color: GREEN,
+    summary: "Priority: Learn chest activation with light dumbbells. Start knee strengthening gently. Daily 40-min cardio block every session.",
     days: [
       {
-        day: "Monday",
-        name: "Upper Body + Cardio",
-        emoji: "💪",
-        details: "🚴 10 min Cycle (easy pace) → 🔄 10 min Elliptical (low resistance) → 💪 Dumbbell Chest Press 3×12 | Cable Chest Fly 3×15 | Seated Cable Row 3×12 | Lat Pulldown 3×12 | DB Shoulder Press 3×12",
-        link: "https://www.youtube.com/watch?v=_1MkDIqT9mA",
-        linkLabel: "▶ Dumbbell Chest Press Tutorial",
-        focus: "Chest & Back"
+        day: "Mon", focus: "Chest Fat Burn A", emoji: "💪",
+        detail: "3×12 Flat Dumbbell Press · 3×12 Dumbbell Flyes · 3×15 Push-ups (knees OK) · 2×12 Incline Press. Full chest squeeze on every rep.",
+        link: CHEST_FAT_URL, linkLabel: "Chest Fat – 8 Dumbbell Exercises",
+        kneeNote: "No standing movements. All lying/seated.", kneeLink: KNEE_URL,
       },
       {
-        day: "Tuesday",
-        name: "Knee Rehab + Core",
-        emoji: "🦵",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → Seated Leg Press (shallow range only) 3×15 | Terminal Knee Extensions with band 3×20 | Seated Calf Raises 3×20 | Dead Bug Core 3×12 | Plank 3×20s",
-        link: "https://www.youtube.com/watch?v=7xG3MeoLjC0",
-        linkLabel: "▶ Banded Terminal Knee Extension (TKE) Tutorial",
-        focus: "Knee Strength & Core"
+        day: "Tue", focus: "Knee Strength + Core", emoji: "🦵",
+        detail: "10 min knee protocol: Straight leg raises · Glute bridges · Clamshells · Wall sits 30s. Then 10 min core: Dead bugs · Planks · Bird dogs.",
+        link: KNEE_URL, linkLabel: "10 Min Knee Strengthening – Physio PT",
+        kneeNote: "Zero impact. Physical therapy approach.", kneeLink: KNEE2_URL,
       },
       {
-        day: "Wednesday",
-        name: "Incline Treadmill + Mobility",
-        emoji: "🚶",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → 🚶 20 min Incline Treadmill (5° incline, 4 km/h) | Hip Flexor Stretch | Foam Roll Quads | Chest Opener | Ankle Mobility 3×10",
-        link: "https://www.youtube.com/watch?v=y0QgnEAav28",
-        linkLabel: "▶ 20-Min Incline Treadmill Fat-Burning Walk",
-        focus: "Fat Burn & Mobility"
+        day: "Wed", focus: "Upper Body (Back & Shoulders)", emoji: "🏋️",
+        detail: "3×12 Dumbbell Rows · 3×12 Shoulder Press · 3×12 Lateral Raises · 3×12 Bicep Curls · 3×12 Tricep Extensions.",
+        link: UPPER_URL, linkLabel: "15 Min Upper Body – Arms, Back, Shoulders",
+        kneeNote: "Seated or standing. Knee neutral.", kneeLink: KNEE_URL,
       },
       {
-        day: "Thursday",
-        name: "Chest Focus Day",
-        emoji: "🔥",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → Cable Chest Fly 4×15 | Incline DB Press 4×12 | Low-to-High Cable Fly (upper chest) 3×15 | Pec Deck / Chest Machine 3×12 | Tricep Pushdown 3×15",
-        link: "https://www.youtube.com/watch?v=eQ_NBB6OBH4",
-        linkLabel: "▶ Low-to-High Cable Fly — Upper Chest Tutorial",
-        focus: "Chest Burn Day"
+        day: "Thu", focus: "Chest Fat Burn B", emoji: "🔥",
+        detail: "4×12 Dumbbell Press · 4×12 Cable Chest Flyes (cable machine in gym) · 3×15 Narrow Push-ups · 3×12 Pullover. Squeeze & hold top 2s.",
+        link: CHEST_BENCH_URL, linkLabel: "20 Min Dumbbell Chest Build & Burn",
+        kneeNote: "Bench pressing only. Knee-safe.", kneeLink: KNEE_URL,
       },
       {
-        day: "Friday",
-        name: "Full Body Low-Impact",
-        emoji: "⚡",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → 🚶 20 min Walk | DB Curl 3×12 | Tricep Extension 3×12 | Lateral Raise 3×15 | Seated Row 3×12 | Dead Bug Core 3×15",
-        link: "https://www.youtube.com/watch?v=OeLb503NZHk",
-        linkLabel: "▶ Seated Cable Row Tutorial (Functional Trainer)",
-        focus: "Full Body Burn"
+        day: "Fri", focus: "Knee Rehab + Core", emoji: "🧘",
+        detail: "10 min knee: Terminal knee extensions · Step touches · Seated leg raises. Then 10 min core abs follow-along.",
+        link: KNEE2_URL, linkLabel: "10 Min Knee Strength – 3×/week Plan",
+        kneeNote: "Dedicated knee day — critical for progression.", kneeLink: KNEE_REHAB_URL,
       },
       {
-        day: "Saturday",
-        name: "Active Recovery + Mobility",
-        emoji: "🧘",
-        details: "🚴 15 min easy Cycle | 🔄 10 min Elliptical (very low resistance) | Full body stretch | Hip mobility flow | Foam rolling chest & quads | Breathing exercises",
-        link: "https://www.youtube.com/watch?v=WUKHM6-ekJM",
-        linkLabel: "▶ 8-Min Hip Mobility Routine (No Equipment)",
-        focus: "Recovery"
+        day: "Sat", focus: "Full Upper Body Circuit", emoji: "⚡",
+        detail: "Giant set ×3: Chest Press + Rows + Shoulder Press + Curls + Triceps. 12 reps each, 90s rest between sets. Total body upper burn.",
+        link: UPPER2_URL, linkLabel: "20 Min Full Upper Body Tone & Sculpt",
+        kneeNote: "Seated/bench. No knee load.", kneeLink: KNEE_URL,
       },
       {
-        day: "Sunday",
-        name: "Rest Day",
-        emoji: "😴",
-        details: "Complete rest. Light 20-min outdoor walk if you feel good. Focus on hydration (3L water) and 8hrs sleep. Meal prep for the week.",
-        link: "https://www.youtube.com/watch?v=bxn9FBrt4-A",
-        linkLabel: "▶ Core Dead Bug — NASM Tutorial (watch for next session)",
-        focus: "Rest"
-      }
-    ]
+        day: "Sun", focus: "Active Recovery + Mobility", emoji: "☀️",
+        detail: "30 min gentle full-body stretch focusing on hip flexors, chest opener, and IT band. Light walk optional.",
+        link: MOB_URL, linkLabel: "30 Min Flexibility & Mobility Routine",
+        kneeNote: "Gentle only. No pain.", kneeLink: KNEE_URL,
+      },
+    ],
   },
   {
-    week: "Week 3–4",
-    subtitle: "Build Intensity",
+    weeks: "Weeks 3–4", label: "Build Phase — Chest Volume + Knee Stability", color: BLUE,
+    summary: "Increase chest volume. Add resistance to knee exercises. Cardio pace steps up. Track weekly weight and waist measurements.",
     days: [
       {
-        day: "Monday",
-        name: "Chest Blast Day",
-        emoji: "💪",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → DB Flat Press 4×12 | DB Incline Press 4×12 | Cable Fly (mid position) 4×15 | Low Cable Fly 3×15 | Tricep Dip Machine 3×12",
-        link: "https://www.youtube.com/watch?v=ovFc-5YdcXw",
-        linkLabel: "▶ How to Properly Perform Cable Chest Fly",
-        focus: "Chest Hypertrophy"
+        day: "Mon", focus: "Chest Sculpt A (Volume)", emoji: "💪",
+        detail: "4×12 Flat DB Press · 4×12 Incline DB Press · 3×15 Chest Flyes · 3×12 Cable Crossover · Push-ups to failure. Increase weight vs W1-2.",
+        link: CHEST_BENCH_URL, linkLabel: "20 Min Dumbbell Chest Build & Burn",
+        kneeNote: "All bench work. Safe.", kneeLink: KNEE2_URL,
       },
       {
-        day: "Tuesday",
-        name: "Knee Strength + Cardio",
-        emoji: "🦵",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → Leg Press (limited depth) 4×15 | TKE with band 3×20 | Straight Leg Raise 3×15 | Step-Up (low platform) 3×12 each | Seated Calf Raise 3×20",
-        link: "https://www.youtube.com/watch?v=xG-DtZqnRSY",
-        linkLabel: "▶ Terminal Knee Extension — Penn State Rehab Tutorial",
-        focus: "Knee & Leg"
+        day: "Tue", focus: "Knee Strength + Core", emoji: "🦵",
+        detail: "Knee: Wall squats 3×30s · Terminal extensions · Step-ups (low step, slow) · Clamshells with band if available. Core: Plank series 3×45s.",
+        link: KNEE2_URL, linkLabel: "10 Min Knee Strength Workout",
+        kneeNote: "No pain zone only. Wall squats max 90°.", kneeLink: KNEE_REHAB_URL,
       },
       {
-        day: "Wednesday",
-        name: "Back + Core + Cardio",
-        emoji: "🏋️",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → Lat Pulldown 4×12 | Seated Cable Row 4×12 | Single Arm DB Row 3×12 | Face Pull 3×15 | Plank 3×30s | Bicycle Crunch 3×20",
-        link: "https://www.youtube.com/watch?v=AKl1em_pH_c",
-        linkLabel: "▶ How to Do Lat Pulldown Correctly — Form & Mistakes",
-        focus: "Back & Core"
+        day: "Wed", focus: "Back & Shoulder Day", emoji: "🏋️",
+        detail: "4×12 Dumbbell Rows · 3×12 Arnold Press · 3×12 Face Pulls (cable) · 3×12 Lateral Raises · Rear delt flyes 3×15.",
+        link: UPPER_URL, linkLabel: "15 Min Upper Body – Full Session",
+        kneeNote: "Seated throughout.", kneeLink: KNEE_URL,
       },
       {
-        day: "Thursday",
-        name: "Incline Cardio + Upper Chest",
-        emoji: "🔥",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → 🚶 20 min Incline Walk (6°) | Incline DB Press 4×12 | Upper Chest Cable Fly 4×15 | Pec Deck Machine 3×15 | DB Shoulder Press 3×12",
-        link: "https://www.youtube.com/watch?v=gl8H4QLXKTo",
-        linkLabel: "▶ How to Perform Incline Dumbbell Press — Upper Chest",
-        focus: "Cardio + Upper Chest"
+        day: "Thu", focus: "Chest Sculpt B + Core", emoji: "🔥",
+        detail: "Superset ×4: DB Press + Chest Flyes, 12 reps each. Rest 60s. Then 10 min core: Leg raises · Russian twists · Crunches.",
+        link: CHEST_FAT_URL, linkLabel: "Chest Fat – 8 Best Dumbbell Exercises",
+        kneeNote: "Flat bench. Core on mat.", kneeLink: KNEE_URL,
       },
       {
-        day: "Friday",
-        name: "Arms + Shoulders",
-        emoji: "💪",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → Bicep Curl 4×12 | Hammer Curl 3×12 | Overhead Tricep Extension 3×15 | Lateral Raise 4×15 | Face Pull 3×15 | Arnold Press 3×12",
-        link: "https://www.youtube.com/watch?v=KRbyo0jj2ao",
-        linkLabel: "▶ How to Perform Dumbbell Chest Press (Form Guide)",
-        focus: "Arms & Shoulders"
+        day: "Fri", focus: "Knee Rehabilitation", emoji: "🦵",
+        detail: "20 min full knee rehabilitation session: VMO activation, straight leg raises, standing terminal knee extension, glute bridge progression.",
+        link: KNEE_REHAB_URL, linkLabel: "20 Min Knee Rehab – Strength & Stability",
+        kneeNote: "Focus session on knee health.", kneeLink: KNEE2_URL,
       },
       {
-        day: "Saturday",
-        name: "Active Recovery",
-        emoji: "🧘",
-        details: "🚴 20 min easy Bike | Stretching session | Foam roll chest & quads | Hip mobility flow | Yoga-style full body stretch",
-        link: "https://www.youtube.com/watch?v=0gctaOxakH4",
-        linkLabel: "▶ Hip Opener Follow-Along Mobility Routine",
-        focus: "Recovery"
+        day: "Sat", focus: "Arms + Chest Finisher", emoji: "💥",
+        detail: "Bicep curls 4×12 · Hammer curls 3×12 · Tricep dips (bench) 3×12 · Skull crushers 3×12 · Chest push-up drop set to failure.",
+        link: UPPER2_URL, linkLabel: "20 Min Full Upper Body – MadFit",
+        kneeNote: "Bench dips only. No floor dips.", kneeLink: KNEE_URL,
       },
       {
-        day: "Sunday",
-        name: "Rest",
-        emoji: "😴",
-        details: "Full rest. Sleep 8 hrs. Drink 3L water. Weigh yourself in the morning.",
-        link: "https://www.youtube.com/watch?v=m8lSq4SC_eM",
-        linkLabel: "▶ Plank, Side Plank & Dead Bug — Core Beginner Guide",
-        focus: "Rest"
-      }
-    ]
+        day: "Sun", focus: "Mobility + Chest Stretch", emoji: "☀️",
+        detail: "Doorway chest stretch · Pec minor release · Full body mobility 30 min. Critical for chest muscle recovery and posture improvement.",
+        link: MOB_URL, linkLabel: "30 Min Full Body Stretch & Mobility",
+        kneeNote: "Gentle stretching only.", kneeLink: KNEE_URL,
+      },
+    ],
   },
   {
-    week: "Week 5–6",
-    subtitle: "Fat Burn Acceleration",
+    weeks: "Weeks 5–6", label: "Intensity Phase — Chest Definition + Knee Power", color: GOLD,
+    summary: "Heavier weights, shorter rest. Chest starts showing definition. Knee should feel notably stronger. Increase cardio incline and bike resistance.",
     days: [
       {
-        day: "Monday",
-        name: "Chest Superset Day",
-        emoji: "🔥",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → SUPERSET A: DB Flat Press + Cable Fly 4×12 | SUPERSET B: Incline DB Press + Pec Deck 4×12 | Tricep Pushdown 3×15 | Low Cable Fly 3×15",
-        link: "https://www.youtube.com/watch?v=hrh0K1Oo7Yc",
-        linkLabel: "▶ How to PROPERLY Cable Chest Fly (Fix Your Form)",
-        focus: "Chest Superset Day"
+        day: "Mon", focus: "Chest Power Day A", emoji: "🏆",
+        detail: "5×10 Heavy Flat DB Press · 4×12 Incline DB Press · 4×12 Cable Flyes · 3×15 Push-up variations. Increase weight by 10-15% vs W3-4.",
+        link: CHEST_ADV_URL, linkLabel: "25 Min Complete Chest Workout – Build & Burn",
+        kneeNote: "Pure bench work. Max chest focus.", kneeLink: KNEE2_URL,
       },
       {
-        day: "Tuesday",
-        name: "Knee Protocol Advanced",
-        emoji: "🦵",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → Monster Walk (resistance band) 3×20 | Leg Press (half depth) 4×15 | Step-Up (low platform) 3×15 each | Wall Sit 3×30s | Seated Leg Curl 3×12",
-        link: "https://www.youtube.com/watch?v=-8FOFgBV-OI",
-        linkLabel: "▶ ACL Rehab: Terminal Knee Extension Exercises Collection",
-        focus: "Knee Protocol"
+        day: "Tue", focus: "Knee Power + Core", emoji: "🦵",
+        detail: "Knee progressions: Shallow split squat 3×10 · Lateral band walks · Terminal knee extensions with band · Step-ups 3×12 each leg.",
+        link: KNEE2_URL, linkLabel: "10 Min Knee Strength – Build Strong Knees",
+        kneeNote: "Shallow split squat only — NO deep bend.", kneeLink: KNEE_REHAB_URL,
       },
       {
-        day: "Wednesday",
-        name: "High Incline Walk + Core",
-        emoji: "🚶",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → 🚶 20 min Incline Walk (8°, 3.5 km/h) | Cable Crunch 3×20 | Hanging Knee Raise 3×15 | Russian Twist 3×20 | Plank 3×40s",
-        link: "https://www.youtube.com/watch?v=suKBh0z78Yc",
-        linkLabel: "▶ 30-Min Incline Interval Walk — Fat Burning Treadmill",
-        focus: "Core Shred"
+        day: "Wed", focus: "Back Heavy + Shoulders", emoji: "💪",
+        detail: "5×10 Heavy DB Rows · 4×12 Overhead Press · 3×12 Upright rows · 3×15 Rear delt flyes · Face pulls 4×15.",
+        link: UPPER_URL, linkLabel: "15 Min Upper Body Dumbbell Session",
+        kneeNote: "All standing/seated. Knee neutral.", kneeLink: KNEE_URL,
       },
       {
-        day: "Thursday",
-        name: "Back + Chest Push-Pull",
-        emoji: "💪",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → SUPERSET: Seated Row + Cable Fly 4×12 | Lat Pulldown 3×12 | Cable Chest Press 3×15 | Face Pull 3×15 | Rear Delt Fly 3×12",
-        link: "https://www.youtube.com/watch?v=XaHV_8Nbyug",
-        linkLabel: "▶ Seated Close Grip Cable Row — Proper Technique",
-        focus: "Push-Pull Day"
+        day: "Thu", focus: "Chest Power Day B + Abs", emoji: "🔥",
+        detail: "Drop set chest: 12 reps heavy → reduce weight → 10 more reps (3 rounds). Cable crossover 4×15. 10 min intense abs follow-along.",
+        link: CHEST_ADV_URL, linkLabel: "25 Min Complete Chest Workout",
+        kneeNote: "Bench press + cable only.", kneeLink: KNEE_URL,
       },
       {
-        day: "Friday",
-        name: "Full Body Circuit",
-        emoji: "⚡",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → 3 ROUNDS: DB Chest Press ×12 | Seated Row ×12 | Shoulder Press ×12 | Bicep Curl ×12 | Tricep Extension ×12 | Plank ×20s | Rest 60s between rounds",
-        link: "https://www.youtube.com/watch?v=YB9S4eMiJl8",
-        linkLabel: "▶ Core Workout: Planks, Dead Bugs & Russian Twists",
-        focus: "Full Circuit"
+        day: "Fri", focus: "Knee + Full Core Burn", emoji: "🧘",
+        detail: "Knee: 20 min full rehabilitation + glute bridge progression. Core: 10 min intense abs. Together = 30 min functional session.",
+        link: KNEE_REHAB_URL, linkLabel: "20 Min Knee Strength Rehab Session",
+        kneeNote: "Controlled. No sudden movements.", kneeLink: KNEE2_URL,
       },
       {
-        day: "Saturday",
-        name: "Mobility + Light Bike",
-        emoji: "🧘",
-        details: "🚴 25 min easy Bike | Full mobility session | Chest & hip flexor focus | Foam roll back & glutes | Shoulder mobility",
-        link: "https://www.youtube.com/watch?v=gNjmLgXz2Bs",
-        linkLabel: "▶ Hip Opening & Mobility Flow — 10 Daily Stretches",
-        focus: "Active Recovery"
+        day: "Sat", focus: "Full Upper Body Burnout", emoji: "⚡",
+        detail: "Giant set ×4 (no rest within set): Chest Press + Rows + Shoulder Press + Curls + Tricep ext. Rest 2 min between giant sets.",
+        link: UPPER2_URL, linkLabel: "20 Min Full Upper Body Tone & Sculpt",
+        kneeNote: "All seated or bench. Zero knee impact.", kneeLink: KNEE_URL,
       },
       {
-        day: "Sunday",
-        name: "Rest",
-        emoji: "😴",
-        details: "Complete rest. Meal prep for the week. Take progress photos (front, side, back).",
-        link: "https://www.youtube.com/watch?v=aFk1SjShgO4",
-        linkLabel: "▶ 3 Essential Core Exercises: Plank, Bird Dog, Dead Bug",
-        focus: "Rest"
-      }
-    ]
+        day: "Sun", focus: "Deep Recovery + Posture", emoji: "☀️",
+        detail: "Foam roll chest/pecs · Pec stretch · Thoracic extension on bench · Full body 30 min mobility. Posture reset after heavy week.",
+        link: MOB_URL, linkLabel: "30 Min Flexibility & Mobility",
+        kneeNote: "Zero intensity. Pure recovery.", kneeLink: KNEE_URL,
+      },
+    ],
   },
   {
-    week: "Week 7–8",
-    subtitle: "Peak Performance",
+    weeks: "Weeks 7–8", label: "Peak Phase — Maximum Chest Burn + Knee Mastery", color: ORANGE,
+    summary: "Final push. Heaviest chest weights of the program. Knees should be strong enough for slow controlled squats. Maximum fat burn mode.",
     days: [
       {
-        day: "Monday",
-        name: "Chest Annihilation Day",
-        emoji: "🔥",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → DB Flat Press 5×10 | DB Incline Press 4×12 | Pec Deck 4×15 | Low Cable Fly 4×15 | High-to-Low Cable Fly 3×15 | Modified Push-Up 2×max",
-        link: "https://www.youtube.com/watch?v=fAmLAQVFq9k",
-        linkLabel: "▶ How to PROPERLY Low Cable Chest Fly — Fix Form",
-        focus: "Chest Annihilation"
+        day: "Mon", focus: "Chest Peak Session A", emoji: "🏅",
+        detail: "PR attempt: Max weight DB Press 4×8 · Incline press 4×10 · Cable flye 4×15 · Push-ups to failure × 3. Chest should be on fire.",
+        link: CHEST_ADV_URL, linkLabel: "25 Min Complete Chest – Peak Workout",
+        kneeNote: "Pure bench. No knee involvement.", kneeLink: KNEE2_URL,
       },
       {
-        day: "Tuesday",
-        name: "Knee Peak Strength",
-        emoji: "🦵",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → Leg Press 5×12 | TKE with band 4×20 | Step-Up 4×15 each | Leg Curl (seated) 3×15 | Standing Calf Raise 4×20 | Single Leg Balance 3×30s",
-        link: "https://www.youtube.com/watch?v=FAfSfbzxTWI",
-        linkLabel: "▶ Terminal Knee Extension (TKE) Progressions",
-        focus: "Knee Peak"
+        day: "Tue", focus: "Knee Mastery + Core Peak", emoji: "🦵",
+        detail: "Advanced knee: Slow controlled squats 3×12 (90° max) · Single leg press on cable low · Step-ups with dumbbell 3×10. 10 min core peak.",
+        link: KNEE_REHAB_URL, linkLabel: "20 Min Knee Rehab – Strength Session",
+        kneeNote: "Controlled squats ONLY if pain-free.", kneeLink: KNEE2_URL,
       },
       {
-        day: "Wednesday",
-        name: "Interval Walk + Core Finisher",
-        emoji: "⚡",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical (higher resistance) → 🚶 20 min Treadmill intervals (2 min fast walk / 1 min incline 8°) | Cable Crunch 4×20 | Leg Raise 4×15 | Plank 3×60s",
-        link: "https://www.youtube.com/watch?v=gbpnMHt93Ok",
-        linkLabel: "▶ 30-Min Fat Burning Incline Walking Treadmill Workout",
-        focus: "Cardio Peak"
+        day: "Wed", focus: "Back & Shoulders Peak", emoji: "💪",
+        detail: "Heavy week: 5×10 rows · Arnold press 4×10 · Lateral raises 4×15 · Cable face pulls 4×20. Track and beat week 5-6 weights.",
+        link: UPPER_URL, linkLabel: "15 Min Upper Body Full Session",
+        kneeNote: "Standing/seated only.", kneeLink: KNEE_URL,
       },
       {
-        day: "Thursday",
-        name: "Back + Chest Final Push",
-        emoji: "💪",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → Lat Pulldown 5×10 | Seated Row 5×10 | DB Incline Chest Press 4×10 | Cable Fly 4×15 | Face Pull 3×15 | Rear Delt Fly 3×12",
-        link: "https://www.youtube.com/watch?v=SALxEARiMkw",
-        linkLabel: "▶ How to Do Lat Pulldowns (Avoid Mistakes!)",
-        focus: "Final Push-Pull"
+        day: "Thu", focus: "Chest Peak Session B", emoji: "🔥",
+        detail: "Burnout chest day: 100 total reps chest press (any rep scheme) · 4×15 flyes · Cable crossover 4×15 · Incline push-ups 3×20.",
+        link: CHEST_FAT_URL, linkLabel: "Chest Fat Burn – 8 Best Exercises",
+        kneeNote: "Bench and cable only.", kneeLink: KNEE_URL,
       },
       {
-        day: "Friday",
-        name: "Full Power Circuit",
-        emoji: "🏆",
-        details: "🚴 10 min Cycle → 🔄 10 min Elliptical → 4 ROUNDS (minimal 30s rest): Chest Press ×10 | Row ×10 | Shoulder Press ×10 | Curl ×10 | Tricep ×10 | Core ×15 | Total workout ~55 min",
-        link: "https://www.youtube.com/watch?v=7BkgqzC6WsM",
-        linkLabel: "▶ How to PROPERLY Seated Cable Row (Do This Now)",
-        focus: "Power Circuit"
+        day: "Fri", focus: "Full Knee + Core Final", emoji: "🧘",
+        detail: "Knee assessment day: All exercises from weeks 1–7 in sequence. See how much stronger you've become. Core 10 min intense finisher.",
+        link: KNEE2_URL, linkLabel: "10 Min Knee Strength – Final Test",
+        kneeNote: "8-week knee progress check!", kneeLink: KNEE_REHAB_URL,
       },
       {
-        day: "Saturday",
-        name: "Final Light Cardio + Stretch",
-        emoji: "🧘",
-        details: "🚴 20 min Bike | 🔄 10 min Elliptical | Full body stretch | Measure final weight | Take transformation photos (front, side, back)",
-        link: "https://www.youtube.com/watch?v=jj2AAH6jbHk",
-        linkLabel: "▶ 12-Min Hip Mobility Routine (Follow Along)",
-        focus: "Final Recovery"
+        day: "Sat", focus: "Ultimate Upper Body Finale", emoji: "🏆",
+        detail: "Celebrate 8 weeks! Full upper body — chest, back, shoulders, arms. Max effort. Giant set × 5. Finish strong. You earned it.",
+        link: UPPER2_URL, linkLabel: "20 Min Full Upper Body – Final Session",
+        kneeNote: "All bench/seated.", kneeLink: KNEE_URL,
       },
       {
-        day: "Sunday",
-        name: "Transformation Review 🏆",
-        emoji: "🏆",
-        details: "Rest. Review 8-week results. Compare Day 1 vs Day 56 photos. Celebrate every kilo lost. Plan Month 3.",
-        link: "https://www.youtube.com/watch?v=5OAsrNU_ZTE",
-        linkLabel: "▶ Quick Hip Mobility Routine (Follow Along)",
-        focus: "Celebrate"
-      }
-    ]
-  }
+        day: "Sun", focus: "Transformation Day 🎉", emoji: "📸",
+        detail: "Take progress photos front/side/back! Measure waist, chest, hips. Compare to Day 1. Rest. Celebrate. You transformed your body!",
+        link: MOB_URL, linkLabel: "Recovery & Mobility – Reward Yourself",
+        kneeNote: "Rest day. You did it.", kneeLink: KNEE_URL,
+      },
+    ],
+  },
 ];
 
 const meals = [
   {
-    type: "Breakfast",
-    emoji: "🌅",
-    name: "High-Protein Egg White Omelette",
-    calories: 380,
-    protein: 35,
-    carbs: 28,
-    fats: 10,
-    ingredients: ["5 egg whites + 1 whole egg", "1 cup fresh spinach", "½ cup mushrooms", "30g oats (cooked in water, on the side)", "1 tsp olive oil", "Salt, pepper, turmeric"],
-    instructions: "Heat pan with olive oil on medium heat. Sauté mushrooms 2 min, add spinach until wilted. Pour egg mixture over vegetables, cook on low 3–4 min until set. Serve with plain oats on the side.",
-    videoLink: "https://www.youtube.com/watch?v=wnOQZ7_7C9A",
-    videoLabel: "▶ Healthy Egg White Omelette — High Protein Low Calorie"
+    type: "🌅 Breakfast", name: "Protein Overnight Oats",
+    calories: 420, protein: 32, carbs: 45, fats: 10,
+    ingredients: ["80g rolled oats","1 scoop vanilla whey protein","200ml unsweetened almond milk","1 tbsp chia seeds","100g mixed berries","1 tsp honey"],
+    instructions: "Mix oats, protein, chia seeds and almond milk in a jar. Refrigerate overnight. Top with berries and honey in the morning. Ready in 5 min prep.",
+    videoLink: "https://www.youtube.com/watch?v=NeBf5ewmI0A",
   },
   {
-    type: "Lunch",
-    emoji: "☀️",
-    name: "Grilled Chicken & Brown Rice Bowl",
-    calories: 520,
-    protein: 45,
-    carbs: 55,
-    fats: 9,
-    ingredients: ["200g chicken breast", "¾ cup brown rice (dry)", "1 cup broccoli florets", "½ cup cherry tomatoes", "Juice of 1 lemon", "Garlic, cumin, smoked paprika, salt"],
-    instructions: "Season chicken with spices. Grill 6–7 min each side or until cooked through. Steam broccoli 4 min. Cook rice per packet. Assemble bowl, squeeze fresh lemon on top.",
-    videoLink: "https://www.youtube.com/watch?v=4QyB5FfkbpA",
-    videoLabel: "▶ Chicken & Rice Meal Prep for Weight Loss"
+    type: "☀️ Lunch", name: "Grilled Chicken & Roasted Veggies",
+    calories: 520, protein: 48, carbs: 35, fats: 14,
+    ingredients: ["180g chicken breast","150g sweet potato cubed","100g broccoli florets","1 tbsp olive oil","Garlic, cumin, paprika","Lemon juice"],
+    instructions: "Season chicken with spices. Pan-sear 4 min each side until golden. Roast sweet potato and broccoli at 200°C for 20 min with olive oil. Serve with lemon.",
+    videoLink: "https://www.youtube.com/watch?v=PbhZCIPL-dU",
   },
   {
-    type: "Dinner",
-    emoji: "🌙",
-    name: "One Pan Baked Salmon & Vegetables",
-    calories: 450,
-    protein: 42,
-    carbs: 20,
-    fats: 18,
-    ingredients: ["180g salmon fillet", "1 cup zucchini sliced", "1 cup bell peppers", "1 tbsp olive oil", "Fresh dill, garlic powder, lemon zest", "½ cup quinoa (cooked)"],
-    instructions: "Preheat oven to 200°C. Place salmon and vegetables on one baking tray. Drizzle with olive oil, season with dill and garlic. Bake 18–20 min. Serve over cooked quinoa.",
-    videoLink: "https://www.youtube.com/watch?v=FQQpIUaSqY0",
-    videoLabel: "▶ One Pan Salmon & Vegetable Bake (30 Min)"
+    type: "🌙 Dinner", name: "Baked Salmon & Asparagus",
+    calories: 480, protein: 42, carbs: 18, fats: 22,
+    ingredients: ["200g salmon fillet","1 bunch asparagus","1 tbsp olive oil","2 cloves garlic minced","Dill, salt, pepper","Half lemon sliced"],
+    instructions: "Drizzle salmon with olive oil, garlic, dill. Lay lemon slices on top. Asparagus alongside. Bake at 190°C for 18–20 min until salmon flakes easily.",
+    videoLink: "https://www.youtube.com/watch?v=Vq_Mc_VT-oo",
   },
   {
-    type: "Snacks",
-    emoji: "🥜",
-    name: "Smart Snack Pack (Between Meals)",
-    calories: 220,
-    protein: 18,
-    carbs: 15,
-    fats: 8,
-    ingredients: ["1 scoop whey protein in 300ml cold water", "1 medium apple", "15g raw almonds", "OR alternative: 150g Greek yogurt + mixed berries"],
-    instructions: "Mix whey protein with cold water and shake well. Eat with apple and almonds as a mid-morning or post-workout snack. Keeps hunger controlled between meals.",
-    videoLink: "https://www.youtube.com/watch?v=865NTDZotmg",
-    videoLabel: "▶ Low Calorie Rice Bowl Meal Prep (Healthy Snack Ideas)"
-  }
+    type: "🍎 Snacks (×2/day)", name: "High-Protein Snack Pack",
+    calories: 280, protein: 28, carbs: 20, fats: 8,
+    ingredients: ["150g Greek yogurt 0% fat","1 medium apple","20g raw almonds","1 hard-boiled egg"],
+    instructions: "Prep night before. Morning snack: Greek yogurt + apple. Pre-workout snack: hard-boiled egg + almonds. Simple, fast, high protein.",
+    videoLink: "https://www.youtube.com/watch?v=4ihO6Hk5jN8",
+  },
 ];
 
 const quotes = [
-  { text: "The body achieves what the mind believes.", author: "Napoleon Hill" },
-  { text: "Every rep, every step, every meal — it all compounds into your new body.", author: "Babê Kaius" },
-  { text: "You don't have to be extreme. Just refuse to quit.", author: "Unknown" },
-  { text: "Pain is temporary. The pride of finishing is forever.", author: "Muhammad Ali" },
-  { text: "Your only competition is who you were yesterday.", author: "Babê Kaius" }
+  { text: "Every rep you do when you don't want to is the rep that changes your body.", author: "Your Future Self" },
+  { text: "You are not starting over. You are starting from experience.", author: "Transformation Truth" },
+  { text: "The gym is hard. Being unhealthy is hard. Choose your hard.", author: "Daily Reminder" },
+  { text: "Kaius is watching you. Be the father who showed up.", author: "Your Greatest Motivation" },
+  { text: "8 weeks from now, you will thank yourself for starting today.", author: "The Plan" },
+  { text: "Consistency beats perfection every single time. Show up imperfectly.", author: "Mindset Reset" },
 ];
 
-export default function Home() {
-  const [weight, setWeight] = useState(105);
-  const [steps, setSteps] = useState(5000);
-  const [water, setWater] = useState(1.5);
-  const [sleep, setSleep] = useState(6);
-  const [openWeek, setOpenWeek] = useState(0);
-  const [openMeal, setOpenMeal] = useState(null);
-  const [openDay, setOpenDay] = useState(null);
-
-  const startWeight = 110;
-  const goalWeight = 95;
-  const weightLost = startWeight - weight;
-  const weightNeeded = startWeight - goalWeight;
-  const weightPct = Math.min(100, Math.max(0, (weightLost / weightNeeded) * 100));
-  const behind = weightLost < weightNeeded * 0.3;
-
-  const inputStyle = {
-    background: "#0D0D18", border: "1px solid #2A2A40", borderRadius: 12,
-    color: "#fff", padding: "10px 14px", fontSize: 15, width: "100%",
-    outline: "none", boxSizing: "border-box"
-  };
-  const labelStyle = {
-    color: "#9999BB", fontSize: 13, marginBottom: 6, display: "block",
-    fontWeight: 600, letterSpacing: 0.5
-  };
-
+function DayRow({ d, weekColor }) {
   return (
-    <div style={{ background: "linear-gradient(135deg,#05050F 0%,#0A0A1A 50%,#080814 100%)", minHeight: "100vh", fontFamily: "Georgia,serif", color: "#fff", paddingBottom: 80 }}>
-
-      {/* Header */}
-      <div style={{ textAlign: "center", padding: "60px 24px 40px", background: "linear-gradient(180deg,#0D0D20 0%,transparent 100%)" }}>
-        <div style={{ display: "inline-block", background: `linear-gradient(135deg,${GOLD}22,${GOLD}11)`, border: `1px solid ${GOLD}44`, borderRadius: 999, padding: "6px 20px", marginBottom: 16 }}>
-          <span style={{ color: GOLD, fontSize: 12, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase" }}>8-Week Program · Dubai 2025</span>
-        </div>
-        <h1 style={{ fontSize: "clamp(36px,8vw,72px)", fontWeight: 900, margin: "0 0 8px", background: `linear-gradient(135deg,#fff 0%,${GOLD} 100%)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          Babê Kaius
-        </h1>
-        <p style={{ color: "#8888AA", fontSize: 16, letterSpacing: 2, textTransform: "uppercase", margin: 0 }}>2-Month Transformation Dashboard</p>
-        <div style={{ display: "flex", justifyContent: "center", gap: 32, marginTop: 32, flexWrap: "wrap" }}>
-          {[["🎯","Goal","-15 kg"],["📅","Duration","8 Weeks"],["🦵","Knee Safe","Protocol"],["🔥","Daily Cardio","40 min"]].map(([emoji,label,val]) => (
-            <div key={label} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 24 }}>{emoji}</div>
-              <div style={{ color: "#6666AA", fontSize: 11, marginTop: 4 }}>{label}</div>
-              <div style={{ color: GOLD, fontSize: 15, fontWeight: 700 }}>{val}</div>
-            </div>
-          ))}
+    <div style={{
+      background: CARD2, border: "1px solid #1f2937", borderRadius: "12px",
+      padding: "16px 20px", marginBottom: "10px",
+    }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "14px", flexWrap: "wrap" }}>
+        <div style={{ fontSize: "26px", flexShrink: 0, marginTop: "2px" }}>{d.emoji}</div>
+        <div style={{ flex: 1, minWidth: "200px" }}>
+          <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", marginBottom: "6px" }}>
+            <span style={{ ...s.tag, background: weekColor + "15", color: weekColor, border: "1px solid " + weekColor + "30" }}>{d.day}</span>
+            <span style={{ fontWeight: "700", fontSize: "15px" }}>{d.focus}</span>
+          </div>
+          <p style={{ fontSize: "13px", color: "#9ca3af", margin: "0 0 4px", lineHeight: "1.6" }}>{d.detail}</p>
+          <div style={{ fontSize: "11px", color: "#4ade80", marginBottom: "10px" }}>
+            🦵 <em>{d.kneeNote}</em>
+          </div>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <a href={d.link} target="_blank" rel="noopener noreferrer"
+              style={{ ...s.btn, ...s.btnBlue, fontSize: "12px", padding: "7px 14px" }}>
+              ▶ {d.linkLabel}
+            </a>
+            <a href={d.kneeLink} target="_blank" rel="noopener noreferrer"
+              style={{ ...s.btn, background: "rgba(34,197,94,0.12)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.25)", fontSize: "12px", padding: "7px 14px" }}>
+              🦵 Knee Video
+            </a>
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
 
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 16px" }}>
+function WeekAccordion({ week }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ ...s.card, padding: "0", overflow: "hidden", marginBottom: "12px" }}>
+      <button
+        style={{
+          ...s.accHdr, padding: "20px 24px",
+          background: "linear-gradient(135deg," + week.color + "10,transparent)",
+          borderBottom: open ? "1px solid #1f2937" : "none",
+        }}
+        onClick={() => setOpen(!open)}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: week.color, boxShadow: "0 0 10px " + week.color, flexShrink: 0 }} />
+          <div style={{ textAlign: "left" }}>
+            <div style={{ fontWeight: "700", fontSize: "16px", color: "#fff" }}>{week.weeks}</div>
+            <div style={{ fontSize: "12px", color: week.color, fontWeight: "600", letterSpacing: "1px", textTransform: "uppercase" }}>{week.label}</div>
+          </div>
+        </div>
+        <span style={{ color: "#9ca3af", fontSize: "20px", transform: open ? "rotate(180deg)" : "none", display: "inline-block" }}>▾</span>
+      </button>
+      {open && (
+        <div style={{ padding: "16px 20px" }}>
+          <div style={{ fontSize: "13px", color: "#d1d5db", marginBottom: "14px", padding: "10px 14px", background: "rgba(255,255,255,0.03)", borderRadius: "8px", lineHeight: "1.6" }}>
+            📋 <strong style={{ color: week.color }}>Phase Goal:</strong> {week.summary}
+          </div>
+          <CardioBlock />
+          {week.days.map((d) => (
+            <DayRow key={d.day} d={d} weekColor={week.color} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
-        {/* Progress Tracker */}
-        <Card style={{ marginBottom: 24 }}>
-          <SectionTitle icon="📊">Live Progress Tracker</SectionTitle>
-          {behind && (
-            <div style={{ background: "#EF444420", border: `1px solid ${RED}44`, borderRadius: 12, padding: "12px 16px", marginBottom: 20, display: "flex", gap: 12, alignItems: "center" }}>
-              <span style={{ fontSize: 22 }}>⚠️</span>
-              <div>
-                <div style={{ color: RED, fontWeight: 700, fontSize: 14 }}>Weight Loss Behind Schedule</div>
-                <div style={{ color: "#FF8888", fontSize: 13, marginTop: 2 }}>Reduce daily calories by 200 and add 10 min extra walking after dinner.</div>
-              </div>
+function MealCard({ meal, index }) {
+  const [open, setOpen] = useState(false);
+  const colors = [GOLD, BLUE, GREEN, ORANGE];
+  const color = colors[index % colors.length];
+  return (
+    <div style={{ ...s.mealCard, borderTop: "3px solid " + color }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", flexWrap: "wrap" }}>
+        <div>
+          <div style={{ fontSize: "12px", color, fontWeight: "700", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "6px" }}>{meal.type}</div>
+          <div style={{ fontSize: "20px", fontWeight: "700" }}>{meal.name}</div>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: "28px", fontWeight: "800", color }}>{meal.calories}</div>
+          <div style={{ fontSize: "11px", color: "#6b7280", fontWeight: "600" }}>CALORIES</div>
+        </div>
+      </div>
+      <div style={s.macroRow}>
+        {macroBadge(BLUE, "🥩 " + meal.protein + "g Protein")}
+        {macroBadge(GOLD, "🌾 " + meal.carbs + "g Carbs")}
+        {macroBadge(GREEN, "🥑 " + meal.fats + "g Fats")}
+      </div>
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: open ? "16px" : 0 }}>
+        <button
+          style={{ ...s.btn, background: color + "15", color, border: "1px solid " + color + "30", fontSize: "12px", padding: "8px 16px" }}
+          onClick={() => setOpen(!open)}
+        >
+          {open ? "▲ Hide Recipe" : "▼ View Recipe"}
+        </button>
+        <a href={meal.videoLink} target="_blank" rel="noopener noreferrer"
+          style={{ ...s.btn, ...s.btnBlue, fontSize: "12px", padding: "8px 16px" }}>
+          🎬 Watch Cooking Video
+        </a>
+      </div>
+      {open && (
+        <div style={{ borderTop: "1px solid #1f2937", paddingTop: "16px", marginTop: "8px" }}>
+          <div style={s.grid2}>
+            <div>
+              <div style={{ fontSize: "12px", color: GOLD, fontWeight: "700", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "10px" }}>Ingredients</div>
+              <ul style={{ margin: 0, padding: "0 0 0 18px", color: "#d1d5db", lineHeight: "2", fontSize: "14px" }}>
+                {meal.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}
+              </ul>
             </div>
-          )}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 20 }}>
-            {[
-              { label: "Current Weight (kg)", val: weight, setVal: setWeight, min: 90, max: 115, step: 0.5, pct: weightPct, color: weightPct > 50 ? GREEN : GOLD, info: `Lost: ${weightLost.toFixed(1)}kg / Goal: ${weightNeeded}kg` },
-              { label: "Daily Steps", val: steps, setVal: setSteps, min: 0, max: 12000, step: 500, pct: (steps/10000)*100, color: BLUE, info: "Target: 10,000 steps" },
-              { label: "Water Intake (L)", val: water, setVal: setWater, min: 0, max: 4, step: 0.25, pct: (water/3)*100, color: "#06B6D4", info: "Target: 3L/day" },
-              { label: "Sleep Hours", val: sleep, setVal: setSleep, min: 4, max: 10, step: 0.5, pct: (sleep/8)*100, color: "#8B5CF6", info: "Target: 8hrs/night" }
-            ].map(({ label, val, setVal, min, max, step, info, pct, color }) => (
-              <div key={label} style={{ background: CARD2, borderRadius: 16, padding: "18px 20px" }}>
-                <label style={labelStyle}>{label}</label>
-                <input type="number" value={val} min={min} max={max} step={step}
-                  onChange={e => setVal(parseFloat(e.target.value))} style={inputStyle} />
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
-                  <span style={{ color: "#6666AA", fontSize: 12 }}>{info}</span>
-                  <span style={{ color, fontSize: 12, fontWeight: 700 }}>{pct.toFixed(0)}%</span>
-                </div>
-                <ProgressBar value={pct} max={100} color={color} />
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Knee Safety */}
-        <Card style={{ marginBottom: 24, border: `1px solid ${RED}33`, background: "#12080A" }}>
-          <SectionTitle icon="🦵">Knee Safety Protocol</SectionTitle>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16 }}>
-            {[
-              { icon: "🚫", title: "No Deep Squats", desc: "Never go below 90° knee bend. Use leg press with limited range only.", color: RED },
-              { icon: "🚫", title: "No Jumping", desc: "Zero box jumps, burpees or impact. Keep both feet on the ground at all times.", color: RED },
-              { icon: "⛔", title: "Stop Sharp Knee Pain", desc: "Stop immediately if you feel sharp/stabbing pain. Discomfort ≠ pain. Know the difference.", color: RED },
-              { icon: "✅", title: "Safe Alternatives", desc: "Cycle + Elliptical daily. Leg press, TKE bands, step-ups on low platform — all approved.", color: GREEN }
-            ].map(({ icon, title, desc, color }) => (
-              <div key={title} style={{ background: "#1A0810", border: `1px solid ${color}22`, borderRadius: 14, padding: "16px 18px" }}>
-                <div style={{ fontSize: 22, marginBottom: 8 }}>{icon}</div>
-                <div style={{ color, fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{title}</div>
-                <div style={{ color: "#CC8888", fontSize: 13, lineHeight: 1.5 }}>{desc}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{ marginTop: 16, background: "#1A1010", borderRadius: 12, padding: "12px 16px", border: `1px solid ${GOLD}22` }}>
-            <span style={{ color: GOLD, fontSize: 13, fontWeight: 700 }}>🎯 Daily Cardio Structure: </span>
-            <span style={{ color: "#CCC", fontSize: 13 }}>🚴 10 min Stationary Cycle + 🔄 10 min Elliptical — zero-impact, knee-safe, and fat-burning every single session.</span>
-          </div>
-        </Card>
-
-        {/* Workout Plan */}
-        <Card style={{ marginBottom: 24 }}>
-          <SectionTitle icon="🏋️">8-Week Workout Plan</SectionTitle>
-          <div style={{ background: `${GOLD}15`, border: `1px solid ${GOLD}33`, borderRadius: 12, padding: "14px 18px", marginBottom: 20 }}>
-            <div style={{ color: GOLD, fontSize: 13, fontWeight: 700, marginBottom: 6 }}>📌 Daily Cardio — Every Session (Before Weights)</div>
-            <div style={{ color: "#DDD", fontSize: 13, lineHeight: 1.8 }}>
-              🚴 <strong style={{ color: "#fff" }}>10 min Stationary Cycle</strong> (moderate pace, resistance 3–5)<br/>
-              🔄 <strong style={{ color: "#fff" }}>10 min Elliptical</strong> (low-to-medium resistance, full arm swing)<br/>
-              💪 Weight Training (as scheduled per day)<br/>
-              🚶 Optional: 20 min incline walk on cardio/walk days
+            <div>
+              <div style={{ fontSize: "12px", color: BLUE, fontWeight: "700", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "10px" }}>How to Cook</div>
+              <p style={{ color: "#d1d5db", fontSize: "14px", lineHeight: "1.7", margin: 0 }}>{meal.instructions}</p>
             </div>
           </div>
-          {workoutWeeks.map((week, wi) => (
-            <div key={wi} style={{ marginBottom: 16 }}>
-              <button onClick={() => setOpenWeek(openWeek === wi ? null : wi)}
-                style={{ width: "100%", background: openWeek === wi ? `${GOLD}18` : CARD2, border: `1px solid ${openWeek === wi ? GOLD+"44" : "#2A2A40"}`, borderRadius: 14, padding: "16px 20px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ color: GOLD, fontWeight: 800, fontSize: 16, textAlign: "left" }}>{week.week}</div>
-                  <div style={{ color: "#8888AA", fontSize: 13, textAlign: "left", marginTop: 2 }}>{week.subtitle}</div>
-                </div>
-                <span style={{ color: GOLD, fontSize: 20 }}>{openWeek === wi ? "▲" : "▼"}</span>
-              </button>
-              {openWeek === wi && (
-                <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
-                  {week.days.map((day, di) => (
-                    <div key={di} style={{ background: "#0D0D1A", borderRadius: 12, border: "1px solid #1E1E30", overflow: "hidden" }}>
-                      <button onClick={() => setOpenDay(openDay === `${wi}-${di}` ? null : `${wi}-${di}`)}
-                        style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                          <span style={{ fontSize: 22 }}>{day.emoji}</span>
-                          <div style={{ textAlign: "left" }}>
-                            <div style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>{day.day} — {day.name}</div>
-                            <div style={{ color: BLUE, fontSize: 12, marginTop: 2 }}>Focus: {day.focus}</div>
-                          </div>
-                        </div>
-                        <span style={{ color: "#666", fontSize: 16 }}>{openDay === `${wi}-${di}` ? "▲" : "▼"}</span>
-                      </button>
-                      {openDay === `${wi}-${di}` && (
-                        <div style={{ padding: "0 18px 16px" }}>
-                          <p style={{ color: "#AAAACC", fontSize: 13, lineHeight: 1.8, margin: "0 0 14px" }}>{day.details}</p>
-                          <a href={day.link} target="_blank" rel="noreferrer"
-                            style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#FF000022", border: "1px solid #FF000044", borderRadius: 8, padding: "9px 16px", color: "#FF6666", textDecoration: "none", fontSize: 13, fontWeight: 700 }}>
-                            {day.linkLabel}
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function BabeKaius() {
+  const [weight, setWeight] = useState("");
+  const [steps, setSteps] = useState("");
+  const [water, setWater] = useState("");
+  const [sleep, setSleep] = useState("");
+
+  const startWeight = 115;
+  const goalWeight = 100;
+  const weightLost = startWeight - (parseFloat(weight) || startWeight);
+  const weightGoal = startWeight - goalWeight;
+  const weightPct = weightGoal > 0 ? Math.max(0, (weightLost / weightGoal) * 100) : 0;
+  const stepsPct = parseFloat(steps) > 0 ? (parseFloat(steps) / 10000) * 100 : 0;
+  const waterPct = parseFloat(water) > 0 ? (parseFloat(water) / 3) * 100 : 0;
+  const sleepPct = parseFloat(sleep) > 0 ? (parseFloat(sleep) / 8) * 100 : 0;
+  const behindSchedule = weight && parseFloat(weight) > startWeight - 1;
+
+  return (
+    <div style={s.page}>
+      {/* HEADER */}
+      <div style={s.header}>
+        <div style={s.glow} />
+        <h1 style={s.title}>Babê Kaius</h1>
+        <p style={s.subtitle}>2-Month Transformation Dashboard</p>
+        <div style={s.badge}>🏆 Week 1 of 8 — The Journey Begins</div>
+      </div>
+
+      <div style={s.wrap}>
+
+        {/* LIVE PROGRESS TRACKER */}
+        <h2 style={s.secTitle}><div style={s.accent} />📊 Live Progress Tracker</h2>
+        <div style={s.grid2}>
+          {[
+            { label: "Current Weight (kg)", value: weight, set: setWeight, placeholder: "e.g. 115" },
+            { label: "Daily Steps", value: steps, set: setSteps, placeholder: "e.g. 8000" },
+            { label: "Water Intake (litres)", value: water, set: setWater, placeholder: "e.g. 2.5" },
+            { label: "Sleep Hours", value: sleep, set: setSleep, placeholder: "e.g. 7.5" },
+          ].map((f) => (
+            <div key={f.label} style={s.card}>
+              <label style={s.label}>{f.label}</label>
+              <input type="number" value={f.value} onChange={(e) => f.set(e.target.value)} placeholder={f.placeholder} style={s.input} />
             </div>
           ))}
-        </Card>
+        </div>
 
-        {/* Food Plan */}
-        <Card style={{ marginBottom: 24 }}>
-          <SectionTitle icon="🥗">Fat-Loss Meal Plan</SectionTitle>
-          <div style={{ background: CARD2, borderRadius: 12, padding: "14px 18px", marginBottom: 20 }}>
-            <div style={{ color: GOLD, fontSize: 13, fontWeight: 700, marginBottom: 10 }}>📊 Daily Totals</div>
-            <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-              {[["~1,570 kcal","Total Calories",GOLD],["~140g","Protein",GREEN],["~118g","Carbs",BLUE],["~45g","Fats","#F97316"]].map(([val,label,color]) => (
-                <div key={label} style={{ textAlign: "center" }}>
-                  <div style={{ color, fontSize: 20, fontWeight: 900 }}>{val}</div>
-                  <div style={{ color: "#6666AA", fontSize: 11 }}>{label}</div>
+        {behindSchedule && (
+          <div style={s.warnCard}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
+              <span style={{ fontSize: "24px" }}>⚠️</span>
+              <span style={{ fontWeight: "700", color: "#f87171", fontSize: "16px" }}>Weight Loss Behind Schedule</span>
+            </div>
+            <p style={{ color: "#fca5a5", margin: 0, fontSize: "14px", lineHeight: "1.6" }}>
+              Target: 0.5–1 kg/week. Check calorie deficit, increase steps, and ensure you are hitting your cardio block every day. You can do this!
+            </p>
+          </div>
+        )}
+
+        <div style={s.card}>
+          <ProgressBar label="⚖️ Weight Goal" current={weightLost.toFixed(1)} target={weightGoal} unit="kg lost" color={"linear-gradient(90deg,#F5C518,#f59e0b)"} />
+          <ProgressBar label="👟 Daily Steps" current={parseFloat(steps) || 0} target={10000} unit="steps" color={"linear-gradient(90deg,#3b82f6,#60a5fa)"} />
+          <ProgressBar label="💧 Water Intake" current={parseFloat(water) || 0} target={3} unit="L" color={"linear-gradient(90deg,#06b6d4,#22d3ee)"} />
+          <ProgressBar label="😴 Sleep Hours" current={parseFloat(sleep) || 0} target={8} unit="hrs" color={"linear-gradient(90deg,#8b5cf6,#a78bfa)"} />
+        </div>
+
+        {/* KNEE SAFETY */}
+        <h2 style={s.secTitle}><div style={s.accent} />🦵 Knee Safety Protocol</h2>
+        <div style={s.warnCard}>
+          <div style={{ fontWeight: "700", color: "#f87171", fontSize: "18px", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+            <span>🚨</span> Critical Knee Rules — Read Every Day
+          </div>
+          <div style={s.grid3}>
+            {[
+              { icon: "🚫", rule: "NO Deep Squats", detail: "No squat below 90°. Use wall sits and shallow bodyweight squats only." },
+              { icon: "🚫", rule: "NO Jumping", detail: "Zero impact. No jump squats, burpees, box jumps or plyometrics." },
+              { icon: "🛑", rule: "STOP Sharp Pain", detail: "Mild ache is fine. Sharp or burning knee pain = STOP immediately." },
+              { icon: "✅", rule: "Safe: Cycling", detail: "Bike at low-medium resistance. Best knee-strengthening cardio available." },
+              { icon: "✅", rule: "Safe: Elliptical", detail: "Gliding motion is zero-impact. Great for fat burn without knee stress." },
+              { icon: "✅", rule: "Safe: Incline Walk", detail: "Treadmill at incline burns fat and builds quads — knee-safe at low speed." },
+            ].map((item) => (
+              <div key={item.rule} style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: "12px", padding: "16px" }}>
+                <div style={{ fontSize: "22px", marginBottom: "6px" }}>{item.icon}</div>
+                <div style={{ fontWeight: "700", color: item.icon === "✅" ? GREEN : "#f87171", fontSize: "14px", marginBottom: "6px" }}>{item.rule}</div>
+                <div style={{ fontSize: "12px", color: "#9ca3af", lineHeight: "1.5" }}>{item.detail}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* DAILY CARDIO STRUCTURE */}
+        <h2 style={s.secTitle}><div style={s.accent} />🔥 Daily Cardio Structure (Every Session)</h2>
+        <div style={s.goldCard}>
+          <div style={{ fontWeight: "700", color: GOLD, fontSize: "16px", marginBottom: "16px" }}>40 Minutes — Fixed Every Training Day</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: "12px", marginBottom: "16px" }}>
+            {[
+              { icon: "🚴", label: "Step 1 — Bike", time: "10 min", detail: "Medium resistance. Warm up legs, activate cardiovascular system.", color: BLUE, link: BIKE_URL },
+              { icon: "🔄", label: "Step 2 — Elliptical", time: "10 min", detail: "Smooth full-body glide. Zero knee impact. Fat-burn zone.", color: PURPLE, link: ELLIP_URL },
+              { icon: "🏃", label: "Step 3 — Incline Walk", time: "20 min", detail: "6–10% incline, 4.5–5.5 km/h. Maximum calorie afterburn.", color: GREEN, link: TREAD_URL },
+            ].map((step) => (
+              <div key={step.label} style={{ background: step.color + "10", border: "1px solid " + step.color + "30", borderRadius: "12px", padding: "16px" }}>
+                <div style={{ fontSize: "24px", marginBottom: "6px" }}>{step.icon}</div>
+                <div style={{ fontWeight: "700", color: step.color, fontSize: "14px" }}>{step.label}</div>
+                <div style={{ fontSize: "22px", fontWeight: "800", color: "#fff", margin: "4px 0" }}>{step.time}</div>
+                <div style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "10px", lineHeight: "1.4" }}>{step.detail}</div>
+                <a href={step.link} target="_blank" rel="noopener noreferrer"
+                  style={{ ...s.btn, background: step.color + "20", color: step.color, border: "1px solid " + step.color + "40", fontSize: "11px", padding: "6px 12px" }}>
+                  ▶ Follow Along
+                </a>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: "13px", color: "#9ca3af", lineHeight: "1.7", padding: "12px 16px", background: "rgba(245,197,24,0.05)", borderRadius: "10px", border: "1px solid rgba(245,197,24,0.1)" }}>
+            <strong style={{ color: GOLD }}>Why this order matters:</strong> Bike first warms the knee joint safely. Elliptical elevates heart rate without impact. Incline walk finishes in the fat-burning zone and directly strengthens the VMO muscle around the knee. This 40-min sequence is your <strong style={{ color: "#fff" }}>chest-fat and visceral-fat furnace</strong> every single day.
+          </div>
+        </div>
+
+        {/* WORKOUT PLAN */}
+        <h2 style={s.secTitle}><div style={s.accent} />🏋️ 8-Week Workout Plan</h2>
+        <div style={s.goldCard}>
+          <p style={{ margin: 0, color: "#d1d5db", fontSize: "14px", lineHeight: "1.7" }}>
+            <strong style={{ color: GOLD }}>Focus #1 — Chest:</strong> Every session targets chest with dumbbell press, flyes, and cable crossovers. Consistent chest work = visible pec definition and reduced chest fat. &nbsp;
+            <strong style={{ color: GREEN }}>Focus #2 — Knee:</strong> Dedicated knee strengthening 3×/week using physical therapy protocols. VMO activation, glute bridges, and terminal knee extensions will make your knees bulletproof.
+          </p>
+        </div>
+        {workoutWeeks.map((w) => <WeekAccordion key={w.weeks} week={w} />)}
+
+        {/* FOOD PLAN */}
+        <h2 style={s.secTitle}><div style={s.accent} />🍽️ Fat-Loss Meal Plan</h2>
+        <div style={s.goldCard}>
+          <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
+            {[
+              { label: "Daily Calories", value: "1,700", color: GOLD },
+              { label: "Daily Protein", value: "150g", color: BLUE },
+              { label: "Daily Carbs", value: "118g", color: GREEN },
+              { label: "Daily Fats", value: "54g", color: ORANGE },
+            ].map((m) => (
+              <div key={m.label} style={{ textAlign: "center", flex: 1, minWidth: "80px" }}>
+                <div style={{ fontSize: "clamp(22px,4vw,32px)", fontWeight: "800", color: m.color }}>{m.value}</div>
+                <div style={{ fontSize: "11px", color: "#6b7280", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>{m.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {meals.map((meal, i) => <MealCard key={meal.name} meal={meal} index={i} />)}
+
+        {/* MOTIVATION */}
+        <h2 style={s.secTitle}><div style={s.accent} />🔥 Motivation & Mindset</h2>
+        <div style={s.grid2}>
+          {quotes.map((q) => (
+            <div key={q.text} style={s.quoteCard}>
+              <div style={{ fontSize: "24px", marginBottom: "12px" }}>💬</div>
+              <p style={{ fontSize: "15px", color: "#e5e7eb", lineHeight: "1.7", fontStyle: "italic", margin: "0 0 12px" }}>"{q.text}"</p>
+              <div style={{ fontSize: "12px", color: GOLD, fontWeight: "700", letterSpacing: "1px", textTransform: "uppercase" }}>— {q.author}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ background: "linear-gradient(135deg,rgba(245,197,24,0.12),rgba(59,130,246,0.08))", border: "1px solid rgba(245,197,24,0.25)", borderRadius: "20px", padding: "36px 28px", textAlign: "center", marginTop: "8px" }}>
+          <div style={{ fontSize: "48px", marginBottom: "16px" }}>👑</div>
+          <h3 style={{ color: GOLD, fontWeight: "800", fontSize: "22px", margin: "0 0 12px" }}>For Kaius. For You. For The Future.</h3>
+          <p style={{ color: "#d1d5db", fontSize: "15px", lineHeight: "1.8", margin: "0 0 20px" }}>
+            Every morning you wake up and choose the gym, you are choosing to be present — not just physically, but as a father, a man, a version of yourself that Kaius will be proud of. This is not about looks. This is about energy, health, and being <strong style={{ color: GOLD }}>fully alive</strong> for the people you love.
+          </p>
+          <div style={{ display: "flex", justifyContent: "center", gap: "12px", flexWrap: "wrap" }}>
+            {["🎯 8 Weeks","🔥 Daily Cardio","💪 Chest Focus","🦵 Knee Safe","🏆 For Kaius"].map((tag) => (
+              <span key={tag} style={{ ...s.tag, fontSize: "13px", padding: "6px 16px" }}>{tag}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* DAILY NON-NEGOTIABLES */}
+        <div style={{ marginTop: "32px" }}>
+          <div style={s.card}>
+            <div style={{ fontWeight: "700", fontSize: "16px", color: "#fff", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+              <span>📋</span> Daily Non-Negotiables
+            </div>
+            <div style={s.grid3}>
+              {[
+                { icon: "🚴", text: "10 min bike + 10 min elliptical + 20 min incline walk — every session" },
+                { icon: "💪", text: "Chest exercises every Monday & Thursday — no skipping chest day" },
+                { icon: "🦵", text: "Knee strengthening exercises Tue, Thu, Fri — protect your joints" },
+                { icon: "💧", text: "Drink 3L water — start with 500ml first thing in the morning" },
+                { icon: "🥩", text: "Hit 150g protein daily — chicken, salmon, eggs, Greek yogurt" },
+                { icon: "😴", text: "Sleep 7–8 hours — fat loss and muscle recovery happen during sleep" },
+              ].map((item) => (
+                <div key={item.text} style={{ display: "flex", gap: "10px", alignItems: "flex-start", padding: "12px", background: CARD2, borderRadius: "10px", border: "1px solid #1f2937" }}>
+                  <span style={{ fontSize: "18px", flexShrink: 0 }}>{item.icon}</span>
+                  <span style={{ fontSize: "13px", color: "#d1d5db", lineHeight: "1.5" }}>{item.text}</span>
                 </div>
               ))}
             </div>
           </div>
-          <div style={{ display: "grid", gap: 16 }}>
-            {meals.map((meal, mi) => (
-              <div key={mi} style={{ background: "#0D0D1A", borderRadius: 16, border: "1px solid #1E1E30", overflow: "hidden" }}>
-                <button onClick={() => setOpenMeal(openMeal === mi ? null : mi)}
-                  style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "18px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <span style={{ fontSize: 28 }}>{meal.emoji}</span>
-                    <div style={{ textAlign: "left" }}>
-                      <div style={{ color: "#8888AA", fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase" }}>{meal.type}</div>
-                      <div style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>{meal.name}</div>
-                      <div style={{ color: GOLD, fontSize: 12, marginTop: 2 }}>{meal.calories} kcal · {meal.protein}g protein</div>
-                    </div>
-                  </div>
-                  <span style={{ color: "#666", fontSize: 16 }}>{openMeal === mi ? "▲" : "▼"}</span>
-                </button>
-                {openMeal === mi && (
-                  <div style={{ padding: "0 20px 20px" }}>
-                    <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-                      {[["Protein", meal.protein+"g", GREEN],["Carbs", meal.carbs+"g", BLUE],["Fats", meal.fats+"g", "#F97316"]].map(([label,val,color]) => (
-                        <div key={label} style={{ background: `${color}15`, border: `1px solid ${color}33`, borderRadius: 8, padding: "6px 14px", textAlign: "center" }}>
-                          <div style={{ color, fontSize: 14, fontWeight: 700 }}>{val}</div>
-                          <div style={{ color: "#888", fontSize: 11 }}>{label}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div style={{ marginBottom: 12 }}>
-                      <div style={{ color: GOLD, fontSize: 13, fontWeight: 700, marginBottom: 6 }}>📋 Ingredients</div>
-                      <ul style={{ margin: 0, padding: "0 0 0 18px" }}>
-                        {meal.ingredients.map((ing, i) => (
-                          <li key={i} style={{ color: "#AAAACC", fontSize: 13, lineHeight: 1.9 }}>{ing}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ color: GOLD, fontSize: 13, fontWeight: 700, marginBottom: 6 }}>👨‍🍳 Instructions</div>
-                      <p style={{ color: "#AAAACC", fontSize: 13, lineHeight: 1.7, margin: 0 }}>{meal.instructions}</p>
-                    </div>
-                    <a href={meal.videoLink} target="_blank" rel="noreferrer"
-                      style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#FF000022", border: "1px solid #FF000044", borderRadius: 8, padding: "10px 18px", color: "#FF6666", textDecoration: "none", fontSize: 13, fontWeight: 700 }}>
-                      {meal.videoLabel}
-                    </a>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Motivation */}
-        <Card style={{ marginBottom: 24 }}>
-          <SectionTitle icon="⚡">Motivation & Mindset</SectionTitle>
-          <div style={{ display: "grid", gap: 14, marginBottom: 24 }}>
-            {quotes.map((q, i) => (
-              <div key={i} style={{ background: CARD2, borderRadius: 14, padding: "18px 20px", borderLeft: `3px solid ${GOLD}` }}>
-                <p style={{ color: "#E8E8FF", fontSize: 15, fontStyle: "italic", margin: "0 0 6px", lineHeight: 1.6 }}>"{q.text}"</p>
-                <p style={{ color: GOLD, fontSize: 12, fontWeight: 700, margin: 0 }}>— {q.author}</p>
-              </div>
-            ))}
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 14 }}>
-            {[
-              { icon: "🔥", title: "Daily Consistency", desc: "Miss once, you're human. Miss twice, you've started a new habit. Never miss twice." },
-              { icon: "🧠", title: "Mindset Shift", desc: "You're not on a diet. You're upgrading your operating system for life. This is permanent." },
-              { icon: "📸", title: "Progress Photos", desc: "Take front, side, and back photos every 2 weeks. The mirror lies. Photos don't." },
-              { icon: "💤", title: "Sleep = Results", desc: "Fat burns while you sleep. Muscles grow while you sleep. 8 hours is non-negotiable." }
-            ].map(({ icon, title, desc }) => (
-              <div key={title} style={{ background: `${GOLD}0A`, border: `1px solid ${GOLD}22`, borderRadius: 14, padding: "16px 18px", textAlign: "center" }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>{icon}</div>
-                <div style={{ color: GOLD, fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{title}</div>
-                <div style={{ color: "#9999BB", fontSize: 12, lineHeight: 1.6 }}>{desc}</div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        <div style={{ textAlign: "center", padding: "20px 0" }}>
-          <p style={{ color: "#333355", fontSize: 13 }}>Built with love for Babê Kaius · Stay Consistent · Dubai 2025</p>
         </div>
+
+      </div>
+
+      <div style={{ textAlign: "center", padding: "24px", borderTop: "1px solid #1f2937", color: "#374151", fontSize: "12px" }}>
+        Built for Babê Kaius · 8-Week Transformation · Dubai 2026
       </div>
     </div>
   );
