@@ -70,84 +70,146 @@ const workoutWeeks=[
   ]},
 ];
 
-// All meals use YouTube SEARCH — guaranteed always available
+
+
+// Meals — calories calculated from EXACT UAE products purchased at LuLu Warsan
+// Total daily: ~1800 kcal | ~159g protein
 const meals=[
   {
     meal:"Breakfast",icon:"☕",time:"10:00 AM",tag:"At work Sun-Thu",
     name:"Protein Oats + Scrambled Eggs",
-    calories:480,protein:36,carbs:48,fat:13,
-    shopNote:"LuLu Warsan: Oats 1kg ~AED 8, Eggs 30pk ~AED 14, Banana ~AED 5",
-    why:"High protein + slow carbs. Keeps you full from 10am to 12:30pm without hunger.",
-    prepTip:"Night before: measure oats in pot, crack eggs into bowl. Morning = 8 min cook.",
-    ingredients:["3 whole eggs scrambled","70g rolled oats","200ml low-fat milk","1 banana sliced","1 tbsp peanut butter","Pinch cinnamon, salt"],
-    instructions:"Cook oats in milk 4-5 min on medium heat stirring. Scramble 3 eggs with salt in separate pan 3 min. Top oats with banana and peanut butter. Eat together.",
-    search:"protein oatmeal scrambled eggs high protein breakfast recipe how to cook",
+    // 3 eggs(216) + 40g oats(152) + 100ml low-fat milk(30) + 2tsp Jif PB(63) + 20g banana(19) = 480 kcal
+    calories:480,protein:33,carbs:38,fat:18,
+    brand:"Jif No Added Sugar PB · Stevia · Cooking Spray",
+    shopNote:"Your items: Oats, Eggs 30pk, Jif No Added Sugar PB, Stevia — LuLu Warsan",
+    why:"3 eggs + oats = 33g protein. Keeps you full 10am to 12:30pm. Jif has 0g added sugar. Stevia = zero calories. Cooking spray = zero oil calories.",
+    prepTip:"Night before: measure 40g oats into pot, crack 3 eggs into bowl. Morning = 8 min cook, zero thinking.",
+    ingredients:[
+      "3 whole eggs (scrambled — cooking spray, 0 cal)",
+      "40g rolled oats",
+      "100ml low-fat milk",
+      "2 tsp Jif No Added Sugar peanut butter",
+      "20g banana (about 3 small slices)",
+      "1g Stevia — half packet or 3 drops liquid",
+      "Pinch of cinnamon and salt",
+    ],
+    instructions:"Cook 40g oats in 100ml milk on medium heat 4-5 min stirring. Spray pan with cooking spray, scramble 3 eggs with pinch of salt 3 min on medium. Stir stevia into warm oats. Top with banana slices and Jif peanut butter. Eat together.",
+    search:"protein oatmeal scrambled eggs high protein breakfast recipe cook",
   },
   {
     meal:"Snack",icon:"🍎",time:"12:30 PM",tag:"At work desk - one snack per day",
-    name:"Greek Yogurt + Fresh Fruit",
-    calories:200,protein:20,carbs:22,fat:4,
-    shopNote:"LuLu Warsan: Greek yogurt 200g ~AED 5, Apples ~AED 8",
-    why:"One daily snack. Bridges breakfast to lunch. Keeps energy and protein steady.",
-    prepTip:"Pack yogurt and 1 apple in your bag every morning. Zero prep. Eat at desk.",
-    ingredients:["200g Greek yogurt 0% fat","1 apple or handful berries","1 tsp honey optional"],
-    instructions:"Open yogurt into bowl or eat from cup. Top with sliced apple or berries and optional honey. Takes 1 minute.",
-    search:"greek yogurt fruit bowl healthy snack recipe high protein",
+    name:"Hayatna Low Fat Yogurt + Apple",
+    // 100g Hayatna(67) + small apple slices(20) = 87 kcal
+    calories:87,protein:5,carbs:14,fat:2,
+    brand:"Hayatna Low Fat Yogurt — 67 kcal per 100g",
+    shopNote:"Your item: Hayatna Low Fat Yogurt — LuLu Warsan",
+    why:"Light bridge between breakfast and lunch. Hayatna low fat is only 67 kcal per 100g — very efficient for the protein it delivers. Keeps you steady until 2pm lunch.",
+    prepTip:"Pack 1 Hayatna pot and 1 apple in your bag every morning. Zero prep. Eat at desk.",
+    ingredients:[
+      "100g Hayatna Low Fat Yogurt",
+      "1 small apple or 5-6 strawberries",
+      "Stevia to taste (0 kcal)",
+    ],
+    instructions:"Open Hayatna yogurt. Slice apple directly into pot or bowl. Add stevia if you like sweetness. Eat at desk at 12:30pm. Takes 1 minute. Can prep in lidded jar the night before.",
+    search:"low fat yogurt apple fruit snack healthy weight loss recipe",
   },
   {
-    meal:"Lunch",icon:"🍗",time:"2:00 PM",tag:"At work - prep night before - no microwave",
-    name:"Grilled Chicken + Rice Cakes + Salad",
-    calories:520,protein:50,carbs:38,fat:12,
-    shopNote:"LuLu Warsan: Chicken 1kg ~AED 18, Rice cakes ~AED 8, Cucumber ~AED 4",
-    why:"Biggest protein meal. Timed at 2pm to fuel afternoon and 8pm workout.",
-    prepTip:"Saturday batch: grill all chicken. Each night pack 180g sliced chicken + rice cakes + salad. 5 min prep.",
-    ingredients:["180g grilled chicken breast sliced","4 plain rice cakes","Half cucumber sliced","8 cherry tomatoes","Handful baby spinach","1 tbsp olive oil, lemon, salt, pepper"],
-    instructions:"Saturday: grill all 600g chicken with garlic cumin salt. Stores 4 days. Each night: slice 180g into container, add rice cakes, veg, drizzle oil and lemon. Eat cold at work - no heating needed.",
-    search:"grilled chicken meal prep rice cakes salad lunch recipe batch cooking",
+    meal:"Lunch",icon:"🍗",time:"2:00 PM",tag:"At work - prep night before - no microwave needed",
+    name:"Grilled Chicken + Brown Rice + Labneh + Salad",
+    // 200g chicken(330) + 80g cooked brown rice(112) + 2tbsp Balade labneh(60) + salad veg(18) = 520 kcal
+    calories:520,protein:55,carbs:40,fat:10,
+    brand:"Baladé Farms Low Fat Labneh (97 kcal / 10g protein per 100g) · Vita Health 45% Less Salt Soy",
+    shopNote:"Your items: Chicken breast, Balade Labneh, Vita soy sauce, Brown basmati rice — LuLu Warsan",
+    why:"55g protein — biggest meal of the day. Fuels afternoon work and your 8pm workout. Balade labneh adds 6g extra protein at only 60 kcal per 2 tbsp. No olive oil — cooking spray used in batch prep.",
+    prepTip:"Saturday batch: grill all chicken with cooking spray + Vita soy. Each night pack 200g chicken + 80g rice + 2 tbsp Balade labneh + salad into container. 5 min prep. Eat cold — no microwave.",
+    ingredients:[
+      "200g grilled chicken breast — sliced (from Saturday batch)",
+      "80g cooked brown basmati rice (from Saturday batch)",
+      "2 tbsp Baladé Farms Low Fat Labneh",
+      "Half cucumber sliced",
+      "8 cherry tomatoes",
+      "Handful baby spinach",
+      "1 tsp Vita Health 45% Less Salt Soy Sauce",
+      "Squeeze of lemon",
+    ],
+    instructions:"Saturday batch: spray pan with cooking spray. Grill all chicken with garlic, cumin, Vita soy, salt — stores 4 days. Cook brown basmati rice — stores 5 days. Each night: slice 200g chicken into container, add 80g rice, 2 tbsp Balade labneh, cucumber, tomatoes, spinach, lemon. Seal. Refrigerate. Eat cold at work.",
+    search:"grilled chicken brown rice meal prep lunch high protein batch cooking",
   },
   {
     meal:"Pre-Workout Snack",icon:"🍌",time:"7:20 PM",tag:"Home - 40 min before gym - LIGHT ONLY",
-    name:"Banana + 2 Boiled Eggs",
-    calories:210,protein:14,carbs:24,fat:7,
-    shopNote:"LuLu Warsan: Bananas 1kg ~AED 5, Eggs 30pk ~AED 14",
-    why:"Light fuel only. Banana = fast carbs for energy. Eggs = protein protection. NOT a full meal. Eating more will make you feel sick during cardio.",
-    prepTip:"Boil all eggs on Sunday night. Peel and store in fridge. Grab banana and 2 eggs at 7:20pm. Done in 30 seconds.",
-    ingredients:["1 ripe banana","2 hard-boiled eggs pre-cooked"],
-    instructions:"Grab banana and 2 pre-boiled eggs from fridge. Eat at exactly 7:20pm - 40 minutes before your 8pm workout. Do not eat anything else before training.",
-    search:"what to eat before evening workout pre workout snack banana eggs",
+    name:"Banana + 1 Boiled Egg + Hayatna Yogurt",
+    // 1 banana(90) + 1 egg(72) + 50g Hayatna(34) = 196 kcal
+    calories:196,protein:10,carbs:28,fat:5,
+    brand:"Hayatna Low Fat Yogurt — 67 kcal per 100g",
+    shopNote:"Your items: Bananas, Eggs, Hayatna Low Fat Yogurt — LuLu Warsan",
+    why:"Light fuel — 40 min before gym. Banana = fast carbs for energy. Egg + Hayatna = protein to protect muscle. NOT a full meal. Eating more will cause nausea during cardio.",
+    prepTip:"Boil all eggs Sunday night. Peel and store in fridge. At 7:20pm grab banana + 1 egg + 50g Hayatna. Done in 30 seconds.",
+    ingredients:[
+      "1 ripe banana",
+      "1 hard-boiled egg (from Sunday batch)",
+      "50g Hayatna Low Fat Yogurt",
+    ],
+    instructions:"Grab banana, 1 pre-boiled egg and 50g Hayatna from fridge. Eat at 7:20pm exactly — 40 minutes before 8pm gym. Do NOT eat anything else before training. This is fuel, not a meal.",
+    search:"pre workout snack banana egg yogurt before evening gym light",
   },
   {
     meal:"Dinner",icon:"🌙",time:"9:45 PM",tag:"Home - after gym - most important meal",
-    name:"Salmon or Chicken + Brown Rice + Broccoli",
-    calories:500,protein:46,carbs:40,fat:14,
-    shopNote:"LuLu Warsan: Salmon 200g ~AED 20, Brown rice 2kg ~AED 12, Broccoli 500g ~AED 5",
-    why:"Eat within 30 min of finishing workout. This is your recovery meal. Salmon omega-3 reduces inflammation and knee pain. Rice refuels muscles. Most important meal of your day.",
-    prepTip:"Saturday: cook 400g rice - stores 5 days. Each night: reheat rice 90 sec + cook protein 10 min + steam broccoli 5 min. Total 15 minutes.",
-    ingredients:["200g salmon fillet or 180g chicken breast","80g cooked brown rice from batch","150g broccoli florets","1 garlic clove minced","1 tsp olive oil","Dash soy sauce, lemon, salt, pepper"],
-    instructions:"Salmon option: rub with garlic, soy sauce, lemon. Pan-fry skin-down 5 min, flip 4 min. Chicken option: slice thin, cook in pan with oil and garlic 5-6 min each side. Steam broccoli with lid 5 min. Reheat rice 90 sec. Serve and eat immediately.",
-    search:"salmon brown rice broccoli healthy dinner recipe how to cook easy",
+    name:"Grilled Chicken + Brown Basmati Rice + Broccoli",
+    // 200g chicken(330) + 80g cooked brown basmati rice(112) + 150g broccoli(51) + Vita soy(5) = 498 kcal
+    calories:498,protein:53,carbs:40,fat:8,
+    brand:"Vita Health 45% Less Salt Soy Sauce · Cooking Spray (0 cal)",
+    shopNote:"Your items: Chicken breast, Brown basmati rice, Broccoli, Vita soy sauce, Cooking spray — LuLu Warsan",
+    why:"Eat within 30 min of finishing workout. Chicken repairs muscle fibres. Rice refuels glycogen stores. Broccoli has sulforaphane which reduces fat storage. Cooking spray = 0 extra calories. Vita soy is 45% less salt — better for blood pressure.",
+    prepTip:"Saturday batch: cook 400g brown basmati rice — stores 5 days. Each night: reheat rice 90 sec + cook chicken 12 min + steam broccoli 5 min = 15 minutes total.",
+    ingredients:[
+      "200g chicken breast (sliced thin)",
+      "80g cooked brown basmati rice (from Saturday batch)",
+      "150g broccoli florets",
+      "1 garlic clove minced",
+      "Cooking spray (0 calories)",
+      "1 tbsp Vita Health 45% Less Salt Soy Sauce",
+      "Lemon squeeze, salt, pepper, paprika",
+    ],
+    instructions:"Spray pan with cooking spray. Season chicken with garlic, paprika, salt, pepper. Cook medium-high 5-6 min each side until golden. Steam broccoli with lid on 5 min. Drizzle Vita soy sauce over chicken and broccoli. Reheat rice 90 sec in microwave. Serve and eat immediately after gym.",
+    search:"grilled chicken breast brown rice broccoli healthy dinner recipe easy",
   },
   {
     meal:"Friday Breakfast",icon:"🌅",time:"9:00 AM",tag:"Friday OFF - cook fresh - take your time",
-    name:"Egg Omelette + Whole Wheat Toast",
-    calories:420,protein:30,carbs:32,fat:16,
-    shopNote:"LuLu Warsan: Eggs, Tomatoes, Spinach, Bread all under AED 20",
-    why:"Rest day. Cook properly. Good nutrition supports Friday recovery.",
-    prepTip:"Friday morning: check what you need before Saturday big shop at LuLu.",
-    ingredients:["3 eggs","Handful baby spinach","2 tomatoes sliced","Half onion diced","1 tsp olive oil","2 slices whole wheat toast","Salt, pepper, cumin"],
-    instructions:"Beat eggs with salt and pepper. Saute onion in oil 2 min. Add spinach and tomato 1 min. Pour eggs over, cook 3-4 min on medium. Fold omelette. Serve with toast.",
-    search:"egg vegetable omelette whole wheat toast healthy breakfast recipe easy",
+    name:"Egg Omelette + LuLu Wholemeal Toast",
+    // 3 eggs(216) + 2 LuLu wholemeal slices(~160) + veg(30) + cooking spray(0) = 406 kcal
+    calories:406,protein:26,carbs:40,fat:14,
+    brand:"LuLu Wholemeal Sliced Bread (wholemeal listed as first ingredient)",
+    shopNote:"Your items: Eggs, LuLu Wholemeal Bread, Tomatoes, Spinach, Cooking spray — LuLu Warsan",
+    why:"Rest day — cook properly and enjoy it. LuLu Wholemeal bread has wholemeal as first ingredient = higher fibre, slower digestion, better blood sugar vs white bread. Good nutrition supports Friday recovery.",
+    prepTip:"Friday morning: good time to check what you need before Saturday big shop at LuLu.",
+    ingredients:[
+      "3 eggs",
+      "Handful baby spinach",
+      "2 tomatoes sliced",
+      "Half onion diced",
+      "Cooking spray (0 calories)",
+      "2 slices LuLu Wholemeal Sliced Bread (toasted)",
+      "Salt, pepper, cumin",
+    ],
+    instructions:"Spray pan with cooking spray. Beat eggs with salt and pepper. Saute onion 2 min. Add spinach and tomato 1 min. Pour eggs over, cook 3-4 min on medium. Fold omelette. Toast LuLu wholemeal bread. Serve together. Eat slowly — it is your day off.",
+    search:"egg vegetable omelette wholemeal toast healthy breakfast recipe easy",
   },
   {
-    meal:"Saturday Batch Cook",icon:"🛒",time:"10:00 AM",tag:"Saturday OFF - weekly shop and batch cook",
-    name:"Weekly Prep: Chicken + Rice + Eggs",
+    meal:"Saturday Batch Cook",icon:"🛒",time:"10:00 AM",tag:"Saturday OFF - weekly shop plus 1 hour batch cook",
+    name:"Weekly Prep: Chicken + Brown Rice + Eggs",
     calories:0,protein:0,carbs:0,fat:0,
-    shopNote:"LuLu Souk Warsan - 5 min from Akasya - open 8am to midnight - about AED 120 per week",
-    why:"One hour Saturday saves 15 min every work day. Guarantees you eat correctly all week.",
-    prepTip:"Buy list: Chicken 1kg, Eggs 30pk, Brown rice 2kg, Oats 1kg, Greek yogurt x5, Salmon for dinners, Rice cakes, Cucumber, Tomatoes, Spinach, Bananas, Apples, Peanut butter.",
-    ingredients:["600g chicken breast grill all for lunches","400g brown rice cook full batch","10 eggs boil all for pre-workout snacks","Pack 4 lunch containers Mon-Thu"],
-    instructions:"1. Grill all 600g chicken with garlic cumin salt - stores 4 days. 2. Cook 400g rice - stores 5 days. 3. Boil 10 eggs - stores 5 days. 4. Pack 4 lunch containers with sliced chicken, rice cakes and salad veg. Done in 60 minutes. Your whole week is ready.",
-    search:"weekly meal prep chicken rice eggs batch cooking beginners how to",
+    brand:"All your purchased LuLu items used this session",
+    shopNote:"LuLu Souk Warsan — 5 min from Akasya South — open 8am to midnight — about AED 120 per week",
+    why:"One hour Saturday saves 15 minutes every work day. Guarantees you eat correctly all week without thinking or deciding.",
+    prepTip:"Weekly buy list: Chicken breast 1kg · Eggs 30pk · Brown basmati rice 2kg · Oats · Hayatna yogurt x6 · LuLu Wholemeal bread · Balade labneh · Bananas · Apples · Broccoli · Cucumber · Tomatoes · Spinach · Vita soy sauce · Cooking spray · Jif PB.",
+    ingredients:[
+      "600g chicken breast — grill all (lunches and dinners)",
+      "400g brown basmati rice — cook full batch",
+      "10 eggs — boil all (for pre-workout snacks)",
+      "Pack 4 lunch containers for Mon-Thu",
+    ],
+    instructions:"1. Spray pan with cooking spray. Grill all 600g chicken with garlic, cumin, Vita soy, salt — stores 4 days in fridge. 2. Cook 400g brown basmati rice — stores 5 days in fridge. 3. Boil 10 eggs — peel, stores 5 days. 4. Pack 4 lunch containers: 200g chicken + 80g rice + 2 tbsp Balade labneh + salad veg. Everything done in 60 minutes. Your whole week is ready.",
+    search:"weekly chicken rice egg meal prep batch cooking beginners how to",
   },
 ];
 
@@ -316,8 +378,8 @@ function FoodView(){
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"8px",marginBottom:"10px"}}>
         {[{l:"Calories",v:totCal,suf:"kcal",c:C.walnut},{l:"Protein",v:totProt,suf:"g",c:C.fern},{l:"Carbs",v:totCarb,suf:"g",c:C.teal},{l:"Fat",v:totFat,suf:"g",c:C.caramel}].map((t,i)=>(<div key={i} style={{background:C.bgDeep,borderRadius:"10px",padding:"10px 6px",textAlign:"center",border:`1px solid ${C.border}`}}><div style={{fontFamily:font.display,fontSize:"16px",fontWeight:"bold",color:t.c}}>{t.v}</div><div style={{fontFamily:font.mono,fontSize:"9px",color:C.textLight}}>{t.suf}</div><div style={{fontFamily:font.body,fontSize:"9px",color:C.textMuted}}>{t.l}</div></div>))}
       </div>
-      <Bar pct={(totProt/140)*100} color={C.fern} h={6}/>
-      <div style={{fontFamily:font.mono,fontSize:"10px",color:C.textMuted,marginTop:"3px",textAlign:"right"}}>{totProt}g protein / 140g target</div>
+      <Bar pct={(totProt/160)*100} color={C.fern} h={6}/>
+      <div style={{fontFamily:font.mono,fontSize:"10px",color:C.textMuted,marginTop:"3px",textAlign:"right"}}>{totProt}g protein / 160g target · deficit ~{2800-totCal} kcal/day</div>
     </Card>
 
     {meals.map((m,i)=>(
@@ -331,6 +393,7 @@ function FoodView(){
               </div>
               <div style={{fontFamily:font.display,fontWeight:"bold",fontSize:"15px",color:C.textDark}}>{m.name}</div>
               <div style={{fontFamily:font.body,fontSize:"10px",color:C.blue,marginTop:"2px"}}>{m.tag}</div>
+              {m.brand&&<div style={{fontFamily:font.mono,fontSize:"10px",color:C.fern,marginTop:"4px",background:C.mintCream,display:"inline-block",padding:"2px 8px",borderRadius:"20px",border:`1px solid ${C.leafPale}`}}>🏷️ {m.brand}</div>}
             </div>
             {m.calories>0&&<div style={{textAlign:"right"}}><div style={{fontFamily:font.display,fontWeight:"bold",fontSize:"22px",color:C.walnut}}>{m.calories}</div><div style={{fontFamily:font.body,fontSize:"9px",color:C.textMuted}}>kcal</div></div>}
           </div>
