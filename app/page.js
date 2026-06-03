@@ -1,443 +1,954 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const C={bg:"#f5ede0",bgPage:"#ede0cc",bgCard:"#fdf6ee",bgDeep:"#f0e4d0",bgDark:"#e8d8c0",border:"#d4b896",sage:"#5a7a48",fern:"#3d6030",moss:"#2d4d22",leafLight:"#7a9e60",leafPale:"#c8ddb8",mintCream:"#e8f0e0",walnut:"#7b4f2a",wood:"#9b6b3c",bark:"#5c3820",caramel:"#b87333",mocha:"#6b3d1a",espresso:"#3d2010",latte:"#c8a876",latteLight:"#dfc49a",foam:"#f5ede0",textDark:"#2d1f0e",textMid:"#5c3820",textMuted:"#8b6b4a",textLight:"#a88060",white:"#fffdf8",red:"#a0432a",teal:"#3d7060",amber:"#c97d30",blue:"#3b6ea5",gold:"#c9960c"};
-const font={display:"'Georgia','Times New Roman',serif",body:"'Palatino Linotype','Book Antiqua',Georgia,serif",mono:"'Courier New',monospace"};
-const PERSONAL={startWeight:105,goalWeight:88,height:176};
-const bmi=(w)=>(w/((PERSONAL.height/100)**2)).toFixed(1);
-const bmiLabel=(b)=>b<18.5?"Underweight":b<25?"Healthy":b<30?"Overweight":"Obese";
+/* ── PANDO THEME ─────────────────────────────────────────── */
+const C = {
+  bg:       "#0f0e0b",
+  bg2:      "#161410",
+  card:     "#1c1916",
+  card2:    "#221f1a",
+  border:   "#2e2820",
+  border2:  "#3d3528",
+  wood:     "#c9933a",
+  woodDark: "#a07020",
+  woodLight:"#e8b86d",
+  latte:    "#d4a96a",
+  cream:    "#f0e0c0",
+  green:    "#5a8a5a",
+  greenLt:  "#7ab87a",
+  greenDim: "#3d6b3d",
+  sage:     "#8faa7a",
+  text:     "#e8dcc8",
+  textMid:  "#b8a888",
+  textDim:  "#786858",
+  red:      "#c0504a",
+  blue:     "#5a8aaa",
+  amber:    "#d4924a",
+};
 
-function Ring({pct,color,size=78,label,value,unit}){const r=((size-10)/2),circ=2*Math.PI*r,dash=(Math.min(100,pct)/100)*circ;return(<div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"5px"}}><div style={{position:"relative",width:size,height:size}}><svg width={size} height={size} style={{transform:"rotate(-90deg)"}}><circle cx={size/2} cy={size/2} r={r} fill="none" stroke={C.bgDark} strokeWidth={7}/><circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={7} strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" style={{transition:"stroke-dasharray 0.8s ease"}}/></svg><div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{fontFamily:font.mono,fontSize:"11px",fontWeight:"bold",color}}>{Math.round(pct)}%</span></div></div><div style={{textAlign:"center"}}><div style={{fontFamily:font.display,fontSize:"13px",color:C.textDark,fontWeight:"bold"}}>{value}{unit}</div><div style={{fontFamily:font.body,fontSize:"10px",color:C.textMuted}}>{label}</div></div></div>);}
-function Bar({pct,color,h=8}){return(<div style={{background:C.bgDark,borderRadius:"20px",height:h,overflow:"hidden",border:`1px solid ${C.border}`}}><div style={{width:`${Math.min(100,Math.max(0,pct))}%`,height:"100%",background:color,borderRadius:"20px",transition:"width 0.8s ease"}}/></div>);}
-function Card({children,style={},topColor}){return(<div style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:"20px",padding:"20px",boxShadow:"0 2px 16px rgba(90,55,20,0.10)",borderTop:topColor?`3px solid ${topColor}`:undefined,...style}}>{children}</div>);}
-function Divider({label}){return(<div style={{display:"flex",alignItems:"center",gap:"10px",margin:"12px 0"}}><div style={{flex:1,height:"1px",background:C.border}}/><span style={{fontFamily:font.body,fontSize:"10px",color:C.textLight,textTransform:"uppercase",letterSpacing:"1.5px"}}>{label}</span><div style={{flex:1,height:"1px",background:C.border}}/></div>);}
-function StatBox({label,value,color,bg}){return(<div style={{background:bg||C.bgDeep,borderRadius:"12px",padding:"11px 8px",textAlign:"center",border:`1px solid ${C.border}`}}><div style={{fontFamily:font.display,fontSize:"15px",fontWeight:"bold",color:color||C.fern}}>{value}</div><div style={{fontFamily:font.body,fontSize:"10px",color:C.textMuted,marginTop:"2px"}}>{label}</div></div>);}
-function NavBtn({label,icon,active,onClick}){return(<button onClick={onClick} style={{flex:1,background:active?`linear-gradient(160deg,${C.fern},${C.moss})`:C.bgDark,border:`1px solid ${active?C.fern:C.border}`,borderRadius:"14px",padding:"12px 6px",color:active?C.white:C.textMuted,fontFamily:font.display,fontWeight:active?"bold":"normal",fontSize:"clamp(11px,2vw,13px)",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:"4px",transition:"all 0.25s ease",boxShadow:active?`0 3px 14px ${C.moss}44`:"none"}}><span style={{fontSize:"18px"}}>{icon}</span>{label}</button>);}
-function InputRow({label,value,onChange,unit,min,max,step,icon}){return(<div style={{marginBottom:"12px"}}><label style={{display:"flex",gap:"5px",alignItems:"center",fontFamily:font.body,fontSize:"11px",color:C.textMuted,textTransform:"uppercase",letterSpacing:"0.8px",marginBottom:"4px"}}><span>{icon}</span>{label}</label><div style={{display:"flex",alignItems:"center",gap:"8px"}}><input type="number" value={value} min={min} max={max} step={step||1} onChange={e=>onChange(Number(e.target.value))} style={{flex:1,background:C.bgDeep,border:`1px solid ${C.border}`,borderRadius:"10px",padding:"9px 13px",color:C.textDark,fontSize:"16px",fontFamily:font.display,fontWeight:"bold",outline:"none",boxSizing:"border-box"}}/><span style={{fontFamily:font.body,fontSize:"12px",color:C.textLight,minWidth:"34px"}}>{unit}</span></div></div>);}
-
-// YouTube SEARCH links — always work, never go unavailable
-function WatchBtn({searchQuery,label="Watch Cooking Video"}){
-  const url="https://www.youtube.com/results?search_query="+encodeURIComponent(searchQuery);
-  return(<a href={url} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",background:`linear-gradient(135deg,${C.red},#7a2a1a)`,color:"#fff",fontWeight:"bold",fontFamily:font.body,fontSize:"13px",padding:"11px",borderRadius:"10px",textDecoration:"none",width:"100%",boxSizing:"border-box"}}>▶ {label}</a>);
-}
-function WorkoutWatchBtn({searchQuery}){
-  const url="https://www.youtube.com/results?search_query="+encodeURIComponent(searchQuery);
-  return(<a href={url} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex",alignItems:"center",gap:"4px",background:C.red,color:"#fff",fontWeight:"bold",fontSize:"11px",padding:"5px 11px",borderRadius:"8px",textDecoration:"none",whiteSpace:"nowrap"}}>▶ Watch</a>);
-}
-
-const cardioBlock=[
-  {order:"1st 10 min",icon:"🚴",name:"Stationary Bike",protocol:"Resistance 4-5, 80-90 RPM",note:"Warms knees gently. Start every session here.",search:"how to use stationary bike workout beginner"},
-  {order:"2nd 10 min",icon:"🌊",name:"Elliptical Machine",protocol:"Level 5-6, push and pull handles",note:"Zero knee impact. Full body burn.",search:"how to use elliptical machine correctly beginner"},
-  {order:"3rd 20 min",icon:"📈",name:"Incline Treadmill Walk",protocol:"4-8% incline, 5.5 km/h, no rails",note:"Primary fat burner. Belly and chest fat.",search:"incline treadmill walk fat loss workout tutorial"},
-];
-
-const workoutWeeks=[
-  {week:"Week 1-2",theme:"Foundation (40 min cardio + 30 min weights)",color:C.sage,focus:"Build base, chest activation, protect knees",days:[
-    {day:"Sun",time:"8:00pm",icon:"💪",name:"Chest Press + Back",target:"CHEST",equipment:"Bench + Dumbbells + Cable",sets:"3 sets x 12 reps",exercises:[{name:"Flat DB Chest Press 10kg",s:"dumbbell bench press proper form tutorial"},{name:"Incline DB Press 10kg upper chest",s:"incline dumbbell press chest tutorial"},{name:"Cable Lat Pulldown",s:"cable lat pulldown proper form tutorial"},{name:"One-Arm DB Row 12kg",s:"one arm dumbbell row proper form tutorial"}]},
-    {day:"Mon",time:"8:00pm",icon:"🦵",name:"Knee Strengthen + Shoulders",target:"KNEES",equipment:"Mat + Dumbbells",sets:"3 sets each",exercises:[{name:"Knee Strengthening 10 min PT routine",s:"knee strengthening exercises beginners physiotherapy"},{name:"Glute Bridge 3x15",s:"glute bridge exercise tutorial proper form"},{name:"DB Lateral Raise 6kg",s:"dumbbell lateral raise proper form tutorial"},{name:"DB Shoulder Press 8kg seated",s:"seated dumbbell shoulder press tutorial"}]},
-    {day:"Tue",time:"8:00pm",icon:"🔥",name:"Cable Chest Fly + Core",target:"CHEST + BELLY",equipment:"Cable + Mat",sets:"3 sets x 12 reps",exercises:[{name:"Cable Low-to-High Fly upper chest",s:"cable low to high chest fly tutorial"},{name:"DB Chest Fly on bench",s:"dumbbell chest fly bench tutorial form"},{name:"Dead Bug core 30s",s:"dead bug exercise core tutorial proper form"},{name:"Plank hold 30s",s:"plank exercise proper form tutorial"}]},
-    {day:"Wed",time:"8:00pm",icon:"🏋️",name:"Cable Full Body",target:"FULL BODY",equipment:"Cable Machine",sets:"3 sets x 12 reps",exercises:[{name:"Cable Lat Pulldown",s:"cable lat pulldown proper form tutorial"},{name:"Cable Seated Row",s:"cable seated row proper form tutorial"},{name:"Cable Woodchop love handles",s:"cable woodchop obliques love handles tutorial"},{name:"Cable Tricep Pushdown",s:"cable tricep pushdown tutorial proper form"}]},
-    {day:"Thu",time:"8:00pm",icon:"💥",name:"Chest Superset + Arms",target:"CHEST BURN",equipment:"Bench + Dumbbells",sets:"4 sets x 10 reps",exercises:[{name:"Flat DB Press superset Incline DB Press",s:"dumbbell chest press superset tutorial"},{name:"DB Chest Fly full stretch",s:"dumbbell chest fly proper form tutorial"},{name:"DB Bicep Curl 10kg",s:"dumbbell bicep curl proper form tutorial"},{name:"DB Tricep Kickback 8kg",s:"dumbbell tricep kickback tutorial form"}]},
-    {day:"Fri",time:"OFF",icon:"😴",name:"Rest Day Friday",target:"REST",equipment:"Home",sets:"Full rest",exercises:[]},
-    {day:"Sat",time:"OFF",icon:"🌿",name:"Active Recovery Saturday",target:"LIGHT",equipment:"Outdoors",sets:"30 min walk + LuLu shop",exercises:[]},
-  ]},
-  {week:"Week 3-4",theme:"Intensity Up (40 min cardio + 35 min weights)",color:C.wood,focus:"Chest attack, love handles, knee build",days:[
-    {day:"Sun",time:"8:00pm",icon:"💥",name:"Chest Power Day",target:"CHEST MAX",equipment:"Bench + Dumbbells + Cable",sets:"4 sets x 10 reps",exercises:[{name:"Flat DB Press 12kg",s:"dumbbell bench press proper form tutorial"},{name:"Incline DB Press 12kg chest fat",s:"incline dumbbell press upper chest fat"},{name:"Cable Low-to-High Fly heavy",s:"cable low to high chest fly tutorial"},{name:"Cable Chest Fly mid",s:"cable chest fly middle chest tutorial"},{name:"Cable Tricep Pushdown",s:"cable tricep pushdown tutorial proper form"}]},
-    {day:"Mon",time:"8:00pm",icon:"🦵",name:"Knee + Back Strength",target:"KNEES + BACK",equipment:"Cable + Mat",sets:"4 sets x 10 reps",exercises:[{name:"Knee Strengthening PT full routine",s:"best knee strengthening exercises physiotherapy routine"},{name:"Cable Lat Pulldown wide grip",s:"cable lat pulldown wide grip tutorial"},{name:"One-Arm DB Row 14kg",s:"one arm dumbbell row tutorial form"},{name:"Glute Bridge march",s:"glute bridge march exercise tutorial"}]},
-    {day:"Tue",time:"8:00pm",icon:"🔥",name:"Core Love Handle Blast",target:"BELLY + OBLIQUES",equipment:"Cable + Mat",sets:"4 rounds",exercises:[{name:"Cable Woodchop high-to-low",s:"cable woodchop high to low obliques tutorial"},{name:"Cable Woodchop low-to-high",s:"cable woodchop low to high tutorial obliques"},{name:"Plank and Side Plank",s:"plank side plank tutorial core exercise"},{name:"Dead Bug 45 seconds",s:"dead bug exercise core tutorial"}]},
-    {day:"Wed",time:"8:00pm",icon:"💪",name:"Upper Chest + Shoulders",target:"CHEST + SHOULDERS",equipment:"Bench + Cable",sets:"4 sets x 10 reps",exercises:[{name:"Incline DB Press 12kg",s:"incline dumbbell press upper chest tutorial"},{name:"Cable Upper Chest Fly",s:"cable upper chest fly tutorial"},{name:"DB Lateral Raise 8kg",s:"dumbbell lateral raise shoulder tutorial"},{name:"Cable Face Pull posture",s:"cable face pull tutorial rear delts posture"}]},
-    {day:"Thu",time:"8:00pm",icon:"🏋️",name:"Back + Bicep Width",target:"WIDE BACK",equipment:"Cable + Dumbbells",sets:"4 sets x 10 reps",exercises:[{name:"Cable Lat Pulldown wide grip",s:"cable lat pulldown wide grip tutorial"},{name:"Cable Seated Row",s:"cable seated row proper form tutorial"},{name:"DB Hammer Curl 12kg",s:"dumbbell hammer curl tutorial proper form"},{name:"Cable Face Pull",s:"cable face pull tutorial proper form"}]},
-    {day:"Fri",time:"OFF",icon:"😴",name:"Rest Day Friday",target:"REST",equipment:"Home",sets:"Full rest",exercises:[]},
-    {day:"Sat",time:"OFF",icon:"🌿",name:"Active Recovery Saturday",target:"SHOP + WALK",equipment:"Outdoors",sets:"LuLu shop + 30 min walk",exercises:[]},
-  ]},
-  {week:"Week 5-6",theme:"Peak Fat Burn (40 min cardio + 40 min weights)",color:C.caramel,focus:"Maximum chest burn, oblique shred",days:[
-    {day:"Sun",time:"8:00pm",icon:"💥",name:"Chest Max Effort",target:"CHEST ULTIMATE",equipment:"Bench + Dumbbells + Cable",sets:"4 sets x 10 reps",exercises:[{name:"Flat DB Press 14kg",s:"dumbbell bench press heavy tutorial"},{name:"Incline DB Press 12kg upper chest",s:"incline dumbbell press upper chest tutorial"},{name:"Cable Low-to-High Fly heavy",s:"cable low to high chest fly tutorial"},{name:"DB Chest Fly flat stretch",s:"dumbbell chest fly tutorial form"},{name:"Cable Tricep heavy",s:"cable tricep pushdown heavy tutorial"}]},
-    {day:"Mon",time:"8:00pm",icon:"🦵",name:"Knee Strength + Pull",target:"KNEES + BACK",equipment:"Cable + Mat",sets:"4 sets",exercises:[{name:"Knee exercises 10 min",s:"knee strengthening exercises no equipment 10 minutes"},{name:"Cable Lat Pulldown close grip",s:"cable lat pulldown close grip tutorial"},{name:"DB Row 14kg",s:"dumbbell bent over row tutorial form"},{name:"Dead Bug 5 rounds",s:"dead bug exercise core stability tutorial"}]},
-    {day:"Tue",time:"8:00pm",icon:"🔥",name:"Core Oblique Blast",target:"LOVE HANDLES",equipment:"Cable + Mat",sets:"5 rounds no rest",exercises:[{name:"Cable Woodchop 12 reps each side",s:"cable woodchop obliques love handles exercise"},{name:"Plank 45 seconds",s:"plank hold exercise tutorial proper form"},{name:"Side Plank 30 seconds",s:"side plank exercise tutorial obliques"},{name:"Dead Bug 45 seconds",s:"dead bug core exercise tutorial"},{name:"Glute Bridge hold",s:"glute bridge hold tutorial"}]},
-    {day:"Wed",time:"8:00pm",icon:"💪",name:"Chest Superset Day",target:"CHEST SUPERSET",equipment:"Bench + Cable",sets:"4 rounds x 10 reps",exercises:[{name:"SUPERSET Incline Press + Cable Fly",s:"chest superset incline press cable fly tutorial"},{name:"SUPERSET Flat Press + Low-High Fly",s:"chest superset flat press cable fly workout"},{name:"DB Shoulder Press 12kg",s:"dumbbell shoulder press tutorial form"}]},
-    {day:"Thu",time:"8:00pm",icon:"🏋️",name:"Back Power Day",target:"WIDE BACK",equipment:"Cable + Dumbbells",sets:"4 sets x 8 reps",exercises:[{name:"Cable Lat Pulldown heavy",s:"cable lat pulldown heavy tutorial"},{name:"DB Row 16kg",s:"dumbbell row heavy back exercise tutorial"},{name:"Cable Seated Row",s:"cable seated row proper form tutorial"},{name:"DB Hammer Curl 14kg",s:"hammer curl tutorial biceps form"}]},
-    {day:"Fri",time:"OFF",icon:"😴",name:"Rest Day Friday",target:"REST",equipment:"Home",sets:"Full rest",exercises:[]},
-    {day:"Sat",time:"OFF",icon:"🎯",name:"Progress Day Saturday",target:"MEASURE",equipment:"Home",sets:"Progress photos + measure",exercises:[]},
-  ]},
-  {week:"Week 7-8",theme:"Victory (40 min cardio + 45 min weights)",color:C.fern,focus:"Cement gains, final chest push",days:[
-    {day:"Sun",time:"8:00pm",icon:"🏆",name:"Chest Final Boss",target:"CHEST HEAVY",equipment:"Bench + Dumbbells + Cable",sets:"4 sets x 8 reps HEAVY",exercises:[{name:"Flat DB Press 16kg",s:"dumbbell bench press heavy form tutorial"},{name:"Incline DB Press 14kg",s:"incline dumbbell press upper chest heavy"},{name:"Cable Low-to-High Fly max",s:"cable low to high fly chest tutorial"},{name:"DB Chest Fly 10kg",s:"dumbbell chest fly proper form tutorial"},{name:"DB Shoulder Press 12kg",s:"dumbbell shoulder press tutorial"}]},
-    {day:"Mon",time:"8:00pm",icon:"🦵",name:"Knee Final Strengthen",target:"BULLETPROOF",equipment:"Mat + Dumbbells",sets:"Full PT routine",exercises:[{name:"Best Knee Strengthening routine",s:"best knee strengthening exercises beginners physiotherapy"},{name:"Glute Bridge 3x20",s:"glute bridge exercise tutorial form"},{name:"DB Row 16kg",s:"dumbbell row back exercise tutorial"}]},
-    {day:"Tue",time:"8:00pm",icon:"🔥",name:"Core Endurance Final",target:"CORE MAX",equipment:"Cable + Mat",sets:"5 rounds timed",exercises:[{name:"Plank 60 seconds",s:"plank exercise core endurance tutorial"},{name:"Dead Bug 60 seconds",s:"dead bug core exercise tutorial"},{name:"Cable Woodchop 15 each side",s:"cable woodchop obliques tutorial"}]},
-    {day:"Wed",time:"8:00pm",icon:"💥",name:"Upper Body Peak",target:"FULL UPPER",equipment:"Full Gym",sets:"4 sets x 8 reps",exercises:[{name:"Flat DB Press 16kg",s:"dumbbell bench press heavy tutorial"},{name:"Cable Lat Pulldown heavy",s:"cable lat pulldown tutorial"},{name:"DB Shoulder Press 12kg",s:"dumbbell shoulder press tutorial"},{name:"Cable Low-to-High Fly",s:"cable chest fly tutorial"},{name:"DB Hammer Curl 14kg",s:"hammer curl biceps tutorial"}]},
-    {day:"Thu",time:"8:00pm",icon:"🎯",name:"Victory Back Session",target:"WIDEST BACK",equipment:"Cable + Dumbbells",sets:"4 sets x 10 reps",exercises:[{name:"Cable Lat Pulldown heavy",s:"cable lat pulldown tutorial"},{name:"DB Row 16kg",s:"dumbbell row back tutorial"},{name:"Cable Seated Row",s:"cable seated row tutorial"},{name:"Cable Face Pull",s:"cable face pull rear delt tutorial"}]},
-    {day:"Fri",time:"OFF",icon:"😴",name:"Rest Day Friday",target:"REST",equipment:"Home",sets:"Full rest",exercises:[]},
-    {day:"Sat",time:"OFF",icon:"✨",name:"Reflection Saturday",target:"CELEBRATE",equipment:"Home",sets:"Final photos + plan next phase",exercises:[]},
-  ]},
-];
-
-
-
-// Meals — calories calculated from EXACT UAE products purchased at LuLu Warsan
-// Total daily: ~1800 kcal | ~159g protein
-const meals=[
-  {
-    meal:"Breakfast",icon:"☕",time:"10:00 AM",tag:"At work Sun-Thu",
-    name:"Protein Oats + Scrambled Eggs",
-    // 3 eggs(216) + 40g oats(152) + 100ml low-fat milk(30) + 2tsp Jif PB(63) + 20g banana(19) = 480 kcal
-    calories:480,protein:33,carbs:38,fat:18,
-    brand:"Jif No Added Sugar PB · Stevia · Cooking Spray",
-    shopNote:"Your items: Oats, Eggs 30pk, Jif No Added Sugar PB, Stevia — LuLu Warsan",
-    why:"3 eggs + oats = 33g protein. Keeps you full 10am to 12:30pm. Jif has 0g added sugar. Stevia = zero calories. Cooking spray = zero oil calories.",
-    prepTip:"Night before: measure 40g oats into pot, crack 3 eggs into bowl. Morning = 8 min cook, zero thinking.",
-    ingredients:[
-      "3 whole eggs (scrambled — cooking spray, 0 cal)",
-      "40g rolled oats",
-      "100ml low-fat milk",
-      "2 tsp Jif No Added Sugar peanut butter",
-      "20g banana (about 3 small slices)",
-      "1g Stevia — half packet or 3 drops liquid",
-      "Pinch of cinnamon and salt",
-    ],
-    instructions:"Cook 40g oats in 100ml milk on medium heat 4-5 min stirring. Spray pan with cooking spray, scramble 3 eggs with pinch of salt 3 min on medium. Stir stevia into warm oats. Top with banana slices and Jif peanut butter. Eat together.",
-    search:"protein oatmeal scrambled eggs high protein breakfast recipe cook",
+const F = {
+  page: { minHeight:"100vh", background:C.bg, color:C.text,
+    fontFamily:"'Georgia','Times New Roman',serif" },
+  header: {
+    background:`linear-gradient(180deg,${C.bg2} 0%,${C.bg} 100%)`,
+    borderBottom:`1px solid ${C.border}`,
+    padding:"28px 20px 20px", textAlign:"center", position:"relative",
   },
-  {
-    meal:"Snack",icon:"🍎",time:"12:30 PM",tag:"At work desk - one snack per day",
-    name:"Hayatna Low Fat Yogurt + Apple",
-    // 100g Hayatna(67) + small apple slices(20) = 87 kcal
-    calories:87,protein:5,carbs:14,fat:2,
-    brand:"Hayatna Low Fat Yogurt — 67 kcal per 100g",
-    shopNote:"Your item: Hayatna Low Fat Yogurt — LuLu Warsan",
-    why:"Light bridge between breakfast and lunch. Hayatna low fat is only 67 kcal per 100g — very efficient for the protein it delivers. Keeps you steady until 2pm lunch.",
-    prepTip:"Pack 1 Hayatna pot and 1 apple in your bag every morning. Zero prep. Eat at desk.",
-    ingredients:[
-      "100g Hayatna Low Fat Yogurt",
-      "1 small apple or 5-6 strawberries",
-      "Stevia to taste (0 kcal)",
-    ],
-    instructions:"Open Hayatna yogurt. Slice apple directly into pot or bowl. Add stevia if you like sweetness. Eat at desk at 12:30pm. Takes 1 minute. Can prep in lidded jar the night before.",
-    search:"low fat yogurt apple fruit snack healthy weight loss recipe",
+  headerGlow: {
+    position:"absolute",top:0,left:"50%",transform:"translateX(-50%)",
+    width:"320px",height:"120px",
+    background:`radial-gradient(ellipse,rgba(201,147,58,0.12) 0%,transparent 70%)`,
+    pointerEvents:"none",
   },
-  {
-    meal:"Lunch",icon:"🍗",time:"2:00 PM",tag:"At work - prep night before - no microwave needed",
-    name:"Grilled Chicken + Brown Rice + Labneh + Salad",
-    // 200g chicken(330) + 80g cooked brown rice(112) + 2tbsp Balade labneh(60) + salad veg(18) = 520 kcal
-    calories:520,protein:55,carbs:40,fat:10,
-    brand:"Baladé Farms Low Fat Labneh (97 kcal / 10g protein per 100g) · Vita Health 45% Less Salt Soy",
-    shopNote:"Your items: Chicken breast, Balade Labneh, Vita soy sauce, Brown basmati rice — LuLu Warsan",
-    why:"55g protein — biggest meal of the day. Fuels afternoon work and your 8pm workout. Balade labneh adds 6g extra protein at only 60 kcal per 2 tbsp. No olive oil — cooking spray used in batch prep.",
-    prepTip:"Saturday batch: grill all chicken with cooking spray + Vita soy. Each night pack 200g chicken + 80g rice + 2 tbsp Balade labneh + salad into container. 5 min prep. Eat cold — no microwave.",
-    ingredients:[
-      "200g grilled chicken breast — sliced (from Saturday batch)",
-      "80g cooked brown basmati rice (from Saturday batch)",
-      "2 tbsp Baladé Farms Low Fat Labneh",
-      "Half cucumber sliced",
-      "8 cherry tomatoes",
-      "Handful baby spinach",
-      "1 tsp Vita Health 45% Less Salt Soy Sauce",
-      "Squeeze of lemon",
-    ],
-    instructions:"Saturday batch: spray pan with cooking spray. Grill all chicken with garlic, cumin, Vita soy, salt — stores 4 days. Cook brown basmati rice — stores 5 days. Each night: slice 200g chicken into container, add 80g rice, 2 tbsp Balade labneh, cucumber, tomatoes, spinach, lemon. Seal. Refrigerate. Eat cold at work.",
-    search:"grilled chicken brown rice meal prep lunch high protein batch cooking",
+  pill: {
+    display:"inline-block", padding:"4px 14px", borderRadius:"100px",
+    background:`rgba(201,147,58,0.12)`, border:`1px solid rgba(201,147,58,0.25)`,
+    fontSize:"11px", color:C.latte, fontWeight:"600", letterSpacing:"2px",
+    textTransform:"uppercase", marginBottom:"12px",
   },
-  {
-    meal:"Pre-Workout Snack",icon:"🍌",time:"7:20 PM",tag:"Home - 40 min before gym - LIGHT ONLY",
-    name:"Banana + 1 Boiled Egg + Hayatna Yogurt",
-    // 1 banana(90) + 1 egg(72) + 50g Hayatna(34) = 196 kcal
-    calories:196,protein:10,carbs:28,fat:5,
-    brand:"Hayatna Low Fat Yogurt — 67 kcal per 100g",
-    shopNote:"Your items: Bananas, Eggs, Hayatna Low Fat Yogurt — LuLu Warsan",
-    why:"Light fuel — 40 min before gym. Banana = fast carbs for energy. Egg + Hayatna = protein to protect muscle. NOT a full meal. Eating more will cause nausea during cardio.",
-    prepTip:"Boil all eggs Sunday night. Peel and store in fridge. At 7:20pm grab banana + 1 egg + 50g Hayatna. Done in 30 seconds.",
-    ingredients:[
-      "1 ripe banana",
-      "1 hard-boiled egg (from Sunday batch)",
-      "50g Hayatna Low Fat Yogurt",
-    ],
-    instructions:"Grab banana, 1 pre-boiled egg and 50g Hayatna from fridge. Eat at 7:20pm exactly — 40 minutes before 8pm gym. Do NOT eat anything else before training. This is fuel, not a meal.",
-    search:"pre workout snack banana egg yogurt before evening gym light",
+  title: {
+    fontSize:"clamp(32px,7vw,52px)", fontWeight:"700",
+    background:`linear-gradient(135deg,${C.woodLight} 0%,${C.cream} 55%,${C.wood} 100%)`,
+    WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent",
+    backgroundClip:"text", margin:"0 0 6px", letterSpacing:"-0.5px",
+    lineHeight:1.1,
   },
-  {
-    meal:"Dinner",icon:"🌙",time:"9:45 PM",tag:"Home - after gym - most important meal",
-    name:"Grilled Chicken + Brown Basmati Rice + Broccoli",
-    // 200g chicken(330) + 80g cooked brown basmati rice(112) + 150g broccoli(51) + Vita soy(5) = 498 kcal
-    calories:498,protein:53,carbs:40,fat:8,
-    brand:"Vita Health 45% Less Salt Soy Sauce · Cooking Spray (0 cal)",
-    shopNote:"Your items: Chicken breast, Brown basmati rice, Broccoli, Vita soy sauce, Cooking spray — LuLu Warsan",
-    why:"Eat within 30 min of finishing workout. Chicken repairs muscle fibres. Rice refuels glycogen stores. Broccoli has sulforaphane which reduces fat storage. Cooking spray = 0 extra calories. Vita soy is 45% less salt — better for blood pressure.",
-    prepTip:"Saturday batch: cook 400g brown basmati rice — stores 5 days. Each night: reheat rice 90 sec + cook chicken 12 min + steam broccoli 5 min = 15 minutes total.",
-    ingredients:[
-      "200g chicken breast (sliced thin)",
-      "80g cooked brown basmati rice (from Saturday batch)",
-      "150g broccoli florets",
-      "1 garlic clove minced",
-      "Cooking spray (0 calories)",
-      "1 tbsp Vita Health 45% Less Salt Soy Sauce",
-      "Lemon squeeze, salt, pepper, paprika",
-    ],
-    instructions:"Spray pan with cooking spray. Season chicken with garlic, paprika, salt, pepper. Cook medium-high 5-6 min each side until golden. Steam broccoli with lid on 5 min. Drizzle Vita soy sauce over chicken and broccoli. Reheat rice 90 sec in microwave. Serve and eat immediately after gym.",
-    search:"grilled chicken breast brown rice broccoli healthy dinner recipe easy",
+  subtitle: { fontSize:"13px", color:C.textMid, letterSpacing:"2.5px",
+    textTransform:"uppercase", margin:"0 0 16px" },
+  statRow: {
+    display:"flex", justifyContent:"center", gap:"24px",
+    flexWrap:"wrap", marginTop:"12px",
   },
-  {
-    meal:"Friday Breakfast",icon:"🌅",time:"9:00 AM",tag:"Friday OFF - cook fresh - take your time",
-    name:"Egg Omelette + LuLu Wholemeal Toast",
-    // 3 eggs(216) + 2 LuLu wholemeal slices(~160) + veg(30) + cooking spray(0) = 406 kcal
-    calories:406,protein:26,carbs:40,fat:14,
-    brand:"LuLu Wholemeal Sliced Bread (wholemeal listed as first ingredient)",
-    shopNote:"Your items: Eggs, LuLu Wholemeal Bread, Tomatoes, Spinach, Cooking spray — LuLu Warsan",
-    why:"Rest day — cook properly and enjoy it. LuLu Wholemeal bread has wholemeal as first ingredient = higher fibre, slower digestion, better blood sugar vs white bread. Good nutrition supports Friday recovery.",
-    prepTip:"Friday morning: good time to check what you need before Saturday big shop at LuLu.",
-    ingredients:[
-      "3 eggs",
-      "Handful baby spinach",
-      "2 tomatoes sliced",
-      "Half onion diced",
-      "Cooking spray (0 calories)",
-      "2 slices LuLu Wholemeal Sliced Bread (toasted)",
-      "Salt, pepper, cumin",
-    ],
-    instructions:"Spray pan with cooking spray. Beat eggs with salt and pepper. Saute onion 2 min. Add spinach and tomato 1 min. Pour eggs over, cook 3-4 min on medium. Fold omelette. Toast LuLu wholemeal bread. Serve together. Eat slowly — it is your day off.",
-    search:"egg vegetable omelette wholemeal toast healthy breakfast recipe easy",
+  statBox: {
+    textAlign:"center", padding:"8px 16px",
+    background:C.card, border:`1px solid ${C.border}`,
+    borderRadius:"10px", minWidth:"70px",
   },
-  {
-    meal:"Saturday Batch Cook",icon:"🛒",time:"10:00 AM",tag:"Saturday OFF - weekly shop plus 1 hour batch cook",
-    name:"Weekly Prep: Chicken + Brown Rice + Eggs",
-    calories:0,protein:0,carbs:0,fat:0,
-    brand:"All your purchased LuLu items used this session",
-    shopNote:"LuLu Souk Warsan — 5 min from Akasya South — open 8am to midnight — about AED 120 per week",
-    why:"One hour Saturday saves 15 minutes every work day. Guarantees you eat correctly all week without thinking or deciding.",
-    prepTip:"Weekly buy list: Chicken breast 1kg · Eggs 30pk · Brown basmati rice 2kg · Oats · Hayatna yogurt x6 · LuLu Wholemeal bread · Balade labneh · Bananas · Apples · Broccoli · Cucumber · Tomatoes · Spinach · Vita soy sauce · Cooking spray · Jif PB.",
-    ingredients:[
-      "600g chicken breast — grill all (lunches and dinners)",
-      "400g brown basmati rice — cook full batch",
-      "10 eggs — boil all (for pre-workout snacks)",
-      "Pack 4 lunch containers for Mon-Thu",
-    ],
-    instructions:"1. Spray pan with cooking spray. Grill all 600g chicken with garlic, cumin, Vita soy, salt — stores 4 days in fridge. 2. Cook 400g brown basmati rice — stores 5 days in fridge. 3. Boil 10 eggs — peel, stores 5 days. 4. Pack 4 lunch containers: 200g chicken + 80g rice + 2 tbsp Balade labneh + salad veg. Everything done in 60 minutes. Your whole week is ready.",
-    search:"weekly chicken rice egg meal prep batch cooking beginners how to",
+  tabs: {
+    display:"flex", borderBottom:`1px solid ${C.border}`,
+    background:C.bg2, position:"sticky", top:0, zIndex:100,
+    overflowX:"auto",
   },
-];
+  tab: (active) => ({
+    flex:1, minWidth:"90px", padding:"14px 12px", border:"none",
+    background:"none", cursor:"pointer", fontSize:"13px", fontWeight:"600",
+    color: active ? C.woodLight : C.textDim,
+    borderBottom: active ? `2px solid ${C.wood}` : "2px solid transparent",
+    transition:"all 0.2s", letterSpacing:"0.3px",
+    whiteSpace:"nowrap",
+  }),
+  wrap: { maxWidth:"900px", margin:"0 auto", padding:"24px 16px 80px" },
+  section: { marginBottom:"8px" },
+  sLabel: {
+    fontSize:"10px", color:C.textDim, fontWeight:"700",
+    letterSpacing:"2px", textTransform:"uppercase", marginBottom:"14px",
+    display:"flex", alignItems:"center", gap:"8px",
+  },
+  sLine: { flex:1, height:"1px", background:C.border },
+  card: {
+    background:C.card, border:`1px solid ${C.border}`,
+    borderRadius:"14px", padding:"20px", marginBottom:"12px",
+    boxShadow:"0 2px 12px rgba(0,0,0,0.3)",
+  },
+  card2: {
+    background:C.card2, border:`1px solid ${C.border}`,
+    borderRadius:"12px", padding:"16px", marginBottom:"10px",
+  },
+  woodCard: {
+    background:`linear-gradient(135deg,rgba(201,147,58,0.10),rgba(201,147,58,0.04))`,
+    border:`1px solid rgba(201,147,58,0.22)`,
+    borderRadius:"14px", padding:"20px", marginBottom:"12px",
+  },
+  greenCard: {
+    background:`linear-gradient(135deg,rgba(90,138,90,0.10),rgba(90,138,90,0.03))`,
+    border:`1px solid rgba(90,138,90,0.25)`,
+    borderRadius:"14px", padding:"20px", marginBottom:"12px",
+  },
+  redCard: {
+    background:"rgba(192,80,74,0.07)", border:"1px solid rgba(192,80,74,0.25)",
+    borderRadius:"14px", padding:"20px", marginBottom:"12px",
+  },
+  grid2: { display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:"12px" },
+  grid3: { display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))", gap:"12px" },
+  input: {
+    width:"100%", background:C.card2, border:`1px solid ${C.border2}`,
+    borderRadius:"8px", padding:"10px 14px", color:C.text,
+    fontSize:"15px", outline:"none", boxSizing:"border-box", marginTop:"6px",
+    fontFamily:"'Georgia','Times New Roman',serif",
+  },
+  inputLabel: { fontSize:"11px", color:C.textDim, fontWeight:"700",
+    letterSpacing:"1px", textTransform:"uppercase", display:"block" },
+  pBar: { height:"6px", borderRadius:"100px", background:C.card2, overflow:"hidden", marginTop:"6px" },
+  btn: (bg, col, bdr) => ({
+    display:"inline-flex", alignItems:"center", gap:"6px",
+    padding:"9px 16px", borderRadius:"9px",
+    border: bdr || "none", cursor:"pointer",
+    fontSize:"12px", fontWeight:"600",
+    background: bg, color: col,
+    textDecoration:"none", transition:"opacity 0.2s",
+    letterSpacing:"0.3px",
+  }),
+  badge: (col) => ({
+    display:"inline-block", padding:"3px 9px", borderRadius:"6px",
+    fontSize:"11px", fontWeight:"700",
+    background: col+"18", color: col,
+    border:`1px solid ${col}35`, marginRight:"5px", marginBottom:"4px",
+  }),
+};
 
-const quotes=[
-  {text:"The pain you feel today will be the strength you feel tomorrow.",author:"Arnold Schwarzenegger"},
-  {text:"It does not matter how slowly you go as long as you do not stop.",author:"Confucius"},
-  {text:"Discipline is choosing between what you want now and what you want most.",author:"Abraham Lincoln"},
-  {text:"Take care of your body. It is the only place you have to live.",author:"Jim Rohn"},
-  {text:"Small daily improvements lead to stunning long-term results.",author:"Robin Sharma"},
-];
+/* ── VERIFIED YOUTUBE LINKS ─────────────────────────────── */
+const YT = {
+  bike10:     "https://www.youtube.com/watch?v=YeHSHwBXbAU",  // 10 Min Beginner Indoor Cycle – Sunny Health ✓
+  ellip10:    "https://www.youtube.com/watch?v=t9KVWTROVb0",  // Beginner Elliptical 10 Min Pyramid – Sunny Trainer Dana ✓
+  incline20:  "https://www.youtube.com/watch?v=yWLJhLKywW0",  // 20 Min Fat-Burning Incline Treadmill Walk Follow-Along ✓
+  chestFat:   "https://www.youtube.com/watch?v=xLnsx4AYExs",  // Lose Chest Fat – 8 Best Dumbbell Exercises ✓
+  chestBuild: "https://www.youtube.com/watch?v=k6cFGQy7Usw",  // 20 Min Dumbbell Chest Build & Burn ✓
+  chestPeak:  "https://www.youtube.com/watch?v=xvv_K1CeEEo",  // 25 Min Complete Chest Workout Build & Burn ✓
+  upper15:    "https://www.youtube.com/watch?v=hT5VD0zdiBc",  // 15 Min Upper Body Dumbbell – Arms Chest Back Shoulders ✓
+  upper20:    "https://www.youtube.com/watch?v=xxVRCzT2a1E",  // 20 Min Full Upper Body Tone & Sculpt – MadFit ✓
+  core10:     "https://www.youtube.com/watch?v=eQdX2_k8FIM",  // 10 Min Beginner Total Core No Equipment ✓
+  coreAbs:    "https://www.youtube.com/watch?v=yTn4bJ29rrU",  // Abs Abs Abs 10 Min Core Coach Todd ✓
+  knee10:     "https://www.youtube.com/watch?v=cJCikne7iKM",  // 10 Min Knee Strengthening – Jessica Valant PT ✓
+  knee3x:     "https://www.youtube.com/watch?v=ysgbSkfGaYY",  // 10 Min Knee Strength – do 3x/week ✓
+  kneeRehab:  "https://www.youtube.com/watch?v=-6W03QOix3M",  // 20 Min Knee Strength Rehab ✓
+  mobility:   "https://www.youtube.com/watch?v=REL4y5a_xF8",  // 30 Min Flexibility Stretching Mobility ✓
+  // FOOD videos
+  oats:       "https://www.youtube.com/watch?v=NeBf5ewmI0A",  // Overnight Oats 6 Ways ✓
+  chicken:    "https://www.youtube.com/watch?v=PbhZCIPL-dU",  // Best Healthy Chicken Breast Recipes ✓
+  salmon:     "https://www.youtube.com/watch?v=Vq_Mc_VT-oo",  // High Protein Salmon Dinner ✓
+  snack:      "https://www.youtube.com/watch?v=4ihO6Hk5jN8",  // Healthy Chicken & Veggies ✓
+};
 
-const schedule=[
-  {t:"9:00am",e:"🚗",d:"Leave Akasya South",h:false},
-  {t:"9:30am",e:"🚇",d:"Metro to Al Ras Station",h:false},
-  {t:"10:00am",e:"☕",d:"Check in + Breakfast",h:true},
-  {t:"12:30pm",e:"🍎",d:"Snack - yogurt and fruit",h:false},
-  {t:"2:00pm",e:"🍗",d:"Lunch - chicken rice cakes salad",h:true},
-  {t:"6:00pm",e:"🚇",d:"Check out - metro home",h:false},
-  {t:"7:15pm",e:"🏠",d:"Arrive home Akasya South",h:false},
-  {t:"7:20pm",e:"🍌",d:"Pre-workout snack - banana and 2 eggs only",h:true},
-  {t:"7:50pm",e:"🚗",d:"Drive to gym",h:false},
-  {t:"8:00pm",e:"🏋️",d:"WORKOUT - 40 min cardio then weights",h:true},
-  {t:"9:30pm",e:"🚗",d:"Drive home from gym",h:false},
-  {t:"9:45pm",e:"🌙",d:"DINNER - salmon + rice + broccoli",h:true},
-  {t:"11:00pm",e:"😴",d:"Sleep - 7 hours recovery",h:false},
-];
-
-function HomeView({logs}){
-  const [qIdx,setQIdx]=useState(0);
-  const sW=PERSONAL.startWeight,gW=PERSONAL.goalWeight,range=sW-gW;
-  const latest=logs.length>0?logs[logs.length-1].weight:sW;
-  const lost=Math.max(0,sW-latest);
-  const wPct=Math.min(100,(lost/range)*100);
-  const done=logs.length;
-  const planned=workoutWeeks.reduce((a,w)=>a+w.days.filter(d=>d.time==="8:00pm").length,0);
-  const woPct=Math.min(100,(done/planned)*100);
-  const avgW=logs.length>0?(logs.reduce((a,l)=>a+(l.water||0),0)/logs.length).toFixed(1):"0";
-  const avgS=logs.length>0?(logs.reduce((a,l)=>a+(l.sleep||0),0)/logs.length).toFixed(1):"0";
-  const curBMI=bmi(latest);
-  const wMeals=meals.filter(m=>m.calories>0&&!m.meal.includes("Friday")&&!m.meal.includes("Saturday"));
-  const totCal=wMeals.reduce((a,m)=>a+m.calories,0);
-  const totProt=wMeals.reduce((a,m)=>a+m.protein,0);
-
-  return(<div>
-    <Card topColor={C.blue} style={{marginBottom:"14px",background:`linear-gradient(135deg,${C.blue}11,${C.bgCard})`}}>
-      <Divider label="Daily Cardio - Every Session First (40 min)"/>
-      <div style={{fontFamily:font.body,fontSize:"12px",color:C.textMid,marginBottom:"10px"}}>Bike 10 min then Elliptical 10 min then Incline Walk 20 min - always before weights</div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
-        {cardioBlock.map((c,i)=>(<div key={i} style={{background:C.bgDeep,borderRadius:"12px",padding:"10px 8px",border:`1px solid ${C.border}`,textAlign:"center"}}><div style={{fontSize:"18px",marginBottom:"3px"}}>{c.icon}</div><div style={{fontFamily:font.display,fontWeight:"bold",fontSize:"11px",color:C.textDark}}>{c.name}</div><div style={{fontFamily:font.mono,fontSize:"10px",color:C.blue,margin:"2px 0"}}>{c.order}</div><WorkoutWatchBtn searchQuery={c.search}/></div>))}
+/* ── CARDIO BLOCK (fixed every session) ─────────────────── */
+function CardioBlock() {
+  return (
+    <div style={{
+      background:`linear-gradient(135deg,rgba(90,138,90,0.10),rgba(201,147,58,0.06))`,
+      border:`1px solid rgba(90,138,90,0.28)`, borderRadius:"12px",
+      padding:"14px 18px", marginBottom:"14px",
+    }}>
+      <div style={{ fontSize:"10px", color:C.greenLt, fontWeight:"700",
+        letterSpacing:"2px", textTransform:"uppercase", marginBottom:"10px" }}>
+        🔥 DAILY CARDIO BLOCK — 40 MIN EVERY SESSION
       </div>
-    </Card>
-
-    <Card topColor={C.gold} style={{marginBottom:"14px",background:`linear-gradient(135deg,${C.gold}11,${C.bgCard})`}}>
-      <Divider label="Your Full Daily Schedule - Sun to Thu"/>
-      {schedule.map((s,i)=>(<div key={i} style={{display:"flex",gap:"10px",alignItems:"center",padding:"6px 8px",borderRadius:"8px",background:s.h?`${C.fern}11`:"transparent",marginBottom:"2px"}}><div style={{fontFamily:font.mono,fontSize:"11px",color:s.h?C.fern:C.gold,minWidth:"58px",fontWeight:s.h?"bold":"normal"}}>{s.t}</div><div style={{fontSize:"15px"}}>{s.e}</div><div style={{fontFamily:font.body,fontSize:"12px",color:s.h?C.fern:C.textMid,fontWeight:s.h?"bold":"normal"}}>{s.d}</div></div>))}
-      <div style={{background:`${C.amber}18`,border:`1px solid ${C.amber}55`,borderRadius:"8px",padding:"8px 12px",marginTop:"8px"}}><div style={{fontFamily:font.body,fontSize:"11px",color:C.mocha}}>Pre-workout at 7:20pm is banana and 2 eggs ONLY. Full dinner comes AFTER gym at 9:45pm.</div></div>
-    </Card>
-
-    <Card topColor={C.wood} style={{marginBottom:"14px"}}>
-      <Divider label="Daily Meal Plan"/>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
-        {[{icon:"☕",label:"Breakfast",time:"10:00am",cal:"480 kcal",color:C.caramel},{icon:"🍎",label:"Snack",time:"12:30pm",cal:"200 kcal",color:C.sage},{icon:"🍗",label:"Lunch",time:"2:00pm",cal:"520 kcal",color:C.wood},{icon:"🍌",label:"Pre-Workout",time:"7:20pm",cal:"210 kcal",color:C.amber},{icon:"🌙",label:"Dinner",time:"9:45pm",cal:"500 kcal",color:C.teal}].map((m,i)=>(<div key={i} style={{background:C.bgDeep,borderRadius:"12px",padding:"10px",border:`1px solid ${C.border}`,display:"flex",gap:"10px",alignItems:"center"}}><div style={{fontSize:"20px"}}>{m.icon}</div><div><div style={{fontFamily:font.display,fontWeight:"bold",fontSize:"13px",color:C.textDark}}>{m.label}</div><div style={{fontFamily:font.mono,fontSize:"10px",color:m.color}}>{m.time}</div><div style={{fontFamily:font.body,fontSize:"10px",color:C.textMuted}}>{m.cal}</div></div></div>))}
+      <div style={{ display:"flex", flexWrap:"wrap", gap:"8px", marginBottom:"8px" }}>
+        {[
+          { icon:"🚴", label:"10 min Bike", url:YT.bike10, color:C.blue },
+          { icon:"🔄", label:"10 min Elliptical", url:YT.ellip10, color:"#9a7ac8" },
+          { icon:"🏔️", label:"20 min Incline Walk", url:YT.incline20, color:C.greenLt },
+        ].map(b => (
+          <a key={b.label} href={b.url} target="_blank" rel="noopener noreferrer"
+            style={F.btn(`${b.color}18`, b.color, `1px solid ${b.color}35`)}>
+            {b.icon} {b.label} ▶
+          </a>
+        ))}
       </div>
-      <div style={{marginTop:"12px",background:`${C.fern}11`,borderRadius:"10px",padding:"10px 14px",border:`1px solid ${C.leafPale}`}}>
-        <div style={{display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
-          {[{l:"Total",v:totCal+" kcal",c:C.walnut},{l:"Protein",v:totProt+"g",c:C.fern},{l:"Deficit",v:"~"+(2800-totCal)+" kcal",c:C.caramel}].map((s,i)=>(<div key={i} style={{textAlign:"center"}}><div style={{fontFamily:font.display,fontWeight:"bold",fontSize:"15px",color:s.c}}>{s.v}</div><div style={{fontFamily:font.body,fontSize:"10px",color:C.textMuted}}>{s.l}</div></div>))}
-        </div>
+      <div style={{ fontSize:"11px", color:C.textDim, lineHeight:"1.5" }}>
+        Bike warms the knee joint · Elliptical zero-impact fat burn · Incline walk targets belly &amp; chest fat
       </div>
-    </Card>
-
-    <Card topColor={C.fern} style={{marginBottom:"14px"}}>
-      <Divider label="Your Profile"/>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
-        <StatBox label="Start Weight" value={sW+"kg"} color={C.walnut}/><StatBox label="Goal Weight" value={gW+"kg"} color={C.fern}/>
-        <StatBox label="Current" value={latest+"kg"} color={C.textDark}/><StatBox label="Height" value={PERSONAL.height+"cm"} color={C.wood}/>
-        <StatBox label="BMI" value={curBMI} color={parseFloat(curBMI)<25?C.fern:C.amber}/><StatBox label="Status" value={bmiLabel(parseFloat(curBMI))} color={parseFloat(curBMI)<25?C.fern:C.amber}/>
-      </div>
-      <div style={{marginTop:"8px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
-        <StatBox label="Lost" value={lost.toFixed(1)+"kg"} color={C.fern} bg={C.mintCream}/>
-        <StatBox label="To Go" value={Math.max(0,range-lost).toFixed(1)+"kg"} color={C.amber} bg={`${C.amber}18`}/>
-        <StatBox label="Done" value={Math.round(wPct)+"%"} color={C.sage} bg={C.mintCream}/>
-      </div>
-    </Card>
-
-    <Card topColor={C.caramel} style={{marginBottom:"14px"}}>
-      <Divider label="Progress Rings"/>
-      <div style={{display:"flex",justifyContent:"space-around",flexWrap:"wrap",gap:"14px"}}>
-        <Ring pct={wPct} color={C.fern} size={78} label="weight" value={lost.toFixed(1)} unit="kg"/>
-        <Ring pct={woPct} color={C.wood} size={78} label="workouts" value={done} unit=""/>
-        <Ring pct={Math.min(100,(parseFloat(avgW)/3)*100)} color={C.teal} size={78} label="avg water" value={avgW} unit="L"/>
-        <Ring pct={Math.min(100,(parseFloat(avgS)/7)*100)} color={C.caramel} size={78} label="avg sleep" value={avgS} unit="h"/>
-      </div>
-    </Card>
-
-    <Card topColor={C.bark} style={{marginBottom:"14px"}}>
-      <Divider label="Workout Log Sheet"/>
-      {logs.length===0?(<div style={{textAlign:"center",padding:"24px 0",color:C.textLight,fontFamily:font.body,fontSize:"13px",fontStyle:"italic"}}>No sessions logged yet. Go to Workout tab and press + Log after each session.</div>):(
-        <div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",fontFamily:font.body,fontSize:"12px"}}><thead><tr style={{borderBottom:`2px solid ${C.border}`}}>{["#","Date","Workout","Weight","Water","Sleep","Feel"].map(h=>(<th key={h} style={{padding:"6px 5px",color:C.textMuted,fontWeight:"normal",textAlign:"left",whiteSpace:"nowrap",fontSize:"10px",textTransform:"uppercase"}}>{h}</th>))}</tr></thead><tbody>{[...logs].reverse().map((log,i)=>(<tr key={i} style={{borderBottom:`1px solid ${C.bgDark}`,background:i%2===0?C.bgDeep:"transparent"}}><td style={{padding:"7px 5px",color:C.textLight}}>{logs.length-i}</td><td style={{padding:"7px 5px",color:C.textMid,whiteSpace:"nowrap"}}>{log.date}</td><td style={{padding:"7px 5px",color:C.textDark,fontWeight:"bold",maxWidth:"120px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{log.workoutName}</td><td style={{padding:"7px 5px",color:C.walnut}}>{log.weight}kg</td><td style={{padding:"7px 5px",color:C.teal}}>{log.water}L</td><td style={{padding:"7px 5px",color:C.fern}}>{log.sleep}h</td><td style={{padding:"7px 5px",fontSize:"16px"}}>{log.feel}</td></tr>))}</tbody></table></div>
-      )}
-    </Card>
-
-    <Card topColor={C.bark} style={{marginBottom:"14px"}}>
-      <Divider label="Knee Safety Protocol"/>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
-        {[{icon:"🚫",t:"No Deep Squats",d:"Nothing below 90",c:C.red},{icon:"🚫",t:"No Jumping",d:"Zero impact",c:C.red},{icon:"🚫",t:"Stop Sharp Pain",d:"Rest and ice",c:C.red},{icon:"✅",t:"Bike First Daily",d:"Warms knees",c:C.fern},{icon:"✅",t:"PT Knee Routine",d:"3 times per week",c:C.fern},{icon:"✅",t:"Ice After Session",d:"10-15 min",c:C.fern}].map((k,i)=>(<div key={i} style={{background:k.c===C.fern?C.mintCream:`${C.red}12`,border:`1px solid ${k.c===C.fern?C.leafPale:C.red+"44"}`,borderRadius:"10px",padding:"10px 12px"}}><div style={{fontSize:"14px",marginBottom:"3px"}}>{k.icon}</div><div style={{fontFamily:font.display,fontSize:"12px",fontWeight:"bold",color:k.c}}>{k.t}</div><div style={{fontFamily:font.body,fontSize:"10px",color:C.textMuted}}>{k.d}</div></div>))}
-      </div>
-    </Card>
-
-    <Card style={{background:`linear-gradient(160deg,${C.mintCream},${C.bgCard})`,border:`1px solid ${C.leafPale}`,textAlign:"center"}}>
-      <div style={{fontFamily:font.display,fontSize:"clamp(14px,3vw,18px)",fontStyle:"italic",color:C.textDark,lineHeight:1.7,marginBottom:"10px"}}>"{quotes[qIdx].text}"</div>
-      <div style={{fontFamily:font.body,fontSize:"12px",color:C.textMuted,marginBottom:"14px"}}>- {quotes[qIdx].author}</div>
-      <button onClick={()=>setQIdx((qIdx+1)%quotes.length)} style={{background:`linear-gradient(135deg,${C.fern},${C.moss})`,color:C.white,border:"none",borderRadius:"10px",padding:"9px 22px",fontFamily:font.body,fontSize:"12px",cursor:"pointer",fontWeight:"bold"}}>Next Quote</button>
-    </Card>
-  </div>);
+    </div>
+  );
 }
 
-function WorkoutView({onLog,logs}){
-  const [openWeek,setOpenWeek]=useState(0);
-  const [logging,setLogging]=useState(null);
-  const [form,setForm]=useState({weight:105,water:2.0,sleep:7,feel:"😊"});
-  const isDone=(name)=>logs.some(l=>l.workoutName===name);
-  const submitLog=()=>{if(!logging)return;const day=workoutWeeks[logging.wi].days[logging.di];const today=new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short"});onLog({date:today,workoutName:day.name,...form});setLogging(null);};
-  return(<div>
-    <div style={{fontFamily:font.display,fontSize:"clamp(18px,3vw,22px)",fontWeight:"bold",color:C.textDark,marginBottom:"3px"}}>8-Week Evening Workout Plan</div>
-    <div style={{fontFamily:font.body,fontSize:"12px",color:C.textMuted,marginBottom:"12px"}}>Sun-Thu 8:00pm to 9:30pm - Fri-Sat Off</div>
-    <Card topColor={C.blue} style={{marginBottom:"16px"}}>
-      <Divider label="Daily Cardio - First Every Session 8:00pm to 8:40pm"/>
-      {cardioBlock.map((c,i)=>(<div key={i} style={{background:C.bgDeep,border:`1px solid ${C.border}`,borderRadius:"12px",padding:"12px 14px",marginBottom:"8px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"8px"}}><div style={{flex:1}}><div style={{fontFamily:font.mono,fontSize:"11px",color:C.blue,marginBottom:"2px"}}>{c.icon} {c.order}</div><div style={{fontFamily:font.display,fontWeight:"bold",fontSize:"13px",color:C.textDark}}>{c.name}</div><div style={{fontFamily:font.body,fontSize:"11px",color:C.textMuted}}>{c.protocol}</div></div><WorkoutWatchBtn searchQuery={c.search}/></div>))}
-    </Card>
-    {logging!==null&&(<div style={{position:"fixed",inset:0,background:"rgba(60,35,10,0.65)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}}><div style={{background:C.bgCard,border:`2px solid ${C.fern}`,borderRadius:"22px",padding:"24px",width:"100%",maxWidth:"360px",maxHeight:"90vh",overflowY:"auto",boxShadow:"0 12px 40px rgba(0,0,0,0.25)"}}><div style={{fontFamily:font.display,fontWeight:"bold",fontSize:"16px",color:C.fern,marginBottom:"3px"}}>Log Completed Session</div><div style={{fontFamily:font.body,fontSize:"13px",color:C.textMid,marginBottom:"18px"}}>{workoutWeeks[logging.wi].days[logging.di].icon} {workoutWeeks[logging.wi].days[logging.di].name}</div><InputRow label="Current Weight kg" value={form.weight} onChange={v=>setForm({...form,weight:v})} unit="kg" min={50} max={200} step={0.5} icon="⚖️"/><InputRow label="Water Today L" value={form.water} onChange={v=>setForm({...form,water:v})} unit="L" min={0} max={6} step={0.1} icon="💧"/><InputRow label="Sleep Last Night h" value={form.sleep} onChange={v=>setForm({...form,sleep:v})} unit="hrs" min={0} max={12} step={0.5} icon="🌙"/><div style={{marginBottom:"16px"}}><div style={{fontFamily:font.body,fontSize:"11px",color:C.textMuted,textTransform:"uppercase",letterSpacing:"0.8px",marginBottom:"8px"}}>How Did You Feel?</div><div style={{display:"flex",gap:"8px"}}>{["😴","😐","😊","💪","🔥"].map(e=>(<button key={e} onClick={()=>setForm({...form,feel:e})} style={{flex:1,fontSize:"20px",padding:"8px 4px",borderRadius:"10px",border:`2px solid ${form.feel===e?C.fern:C.border}`,background:form.feel===e?C.mintCream:C.bgDeep,cursor:"pointer"}}>{e}</button>))}</div></div><div style={{display:"flex",gap:"10px"}}><button onClick={()=>setLogging(null)} style={{flex:1,background:C.bgDeep,border:`1px solid ${C.border}`,borderRadius:"12px",padding:"12px",color:C.textMuted,fontFamily:font.body,fontSize:"13px",cursor:"pointer"}}>Cancel</button><button onClick={submitLog} style={{flex:2,background:`linear-gradient(135deg,${C.fern},${C.moss})`,border:"none",borderRadius:"12px",padding:"12px",color:C.white,fontFamily:font.display,fontWeight:"bold",fontSize:"14px",cursor:"pointer"}}>Save to Log</button></div></div></div>)}
-    {workoutWeeks.map((wk,wi)=>(<div key={wi} style={{marginBottom:"10px",background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:"18px",overflow:"hidden",boxShadow:"0 2px 10px rgba(90,55,20,0.08)"}}><button onClick={()=>setOpenWeek(openWeek===wi?-1:wi)} style={{width:"100%",background:openWeek===wi?`linear-gradient(90deg,${wk.color}18,${C.bgCard})`:C.bgCard,border:"none",padding:"16px 18px",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:openWeek===wi?`1px solid ${C.border}`:"none"}}><div style={{textAlign:"left"}}><div style={{fontFamily:font.display,fontWeight:"bold",fontSize:"14px",color:wk.color}}>{wk.week}</div><div style={{fontFamily:font.body,fontSize:"11px",color:C.textMuted}}>{wk.theme}</div><div style={{fontFamily:font.body,fontSize:"10px",color:wk.color,marginTop:"2px"}}>{wk.focus}</div></div><span style={{color:wk.color,fontSize:"16px",transform:openWeek===wi?"rotate(180deg)":"none",transition:"transform 0.3s"}}>▼</span></button>{openWeek===wi&&(<div style={{padding:"10px"}}>{wk.days.map((d,di)=>{const done=isDone(d.name);const isOff=d.time==="OFF";return(<div key={di} style={{background:isOff?`${C.amber}10`:done?C.mintCream:C.bgDeep,border:`1px solid ${isOff?C.border:done?C.leafPale:C.border}`,borderRadius:"14px",padding:"14px",marginBottom:"8px"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:"8px",marginBottom:d.exercises.length>0?"8px":"0"}}><div style={{flex:1}}><div style={{display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap",marginBottom:"3px"}}><span style={{fontFamily:font.body,fontSize:"10px",color:C.textLight,textTransform:"uppercase"}}>{d.icon} {d.day}</span><span style={{fontFamily:font.mono,fontSize:"10px",color:wk.color,background:`${wk.color}18`,padding:"2px 8px",borderRadius:"20px"}}>{d.time}</span><span style={{fontFamily:font.mono,fontSize:"10px",color:C.red,background:`${C.red}15`,padding:"2px 8px",borderRadius:"20px"}}>{d.target}</span></div><div style={{fontFamily:font.display,fontWeight:"bold",fontSize:"14px",color:done?C.fern:C.textDark}}>{d.name}{done?" Done":""}</div><div style={{fontFamily:font.body,fontSize:"11px",color:C.textMuted}}>{d.equipment} - {d.sets}</div></div>{!isOff&&(<button onClick={()=>{setLogging({wi,di});setForm({weight:105,water:2.0,sleep:7,feel:"😊"});}} style={{background:done?C.mintCream:`linear-gradient(135deg,${C.fern},${C.moss})`,border:`1px solid ${done?C.fern:C.moss}`,color:done?C.fern:C.white,fontWeight:"bold",fontSize:"11px",padding:"6px 12px",borderRadius:"8px",cursor:"pointer",fontFamily:font.body,whiteSpace:"nowrap"}}>{done?"Logged":"+ Log"}</button>)}</div>{d.exercises.length>0&&(<div style={{display:"flex",flexDirection:"column",gap:"5px"}}>{d.exercises.map((ex,ei)=>(<div key={ei} style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:C.bgCard,borderRadius:"8px",padding:"7px 10px",gap:"8px"}}><span style={{fontFamily:font.body,fontSize:"12px",color:C.textDark,flex:1}}>{ex.name}</span><WorkoutWatchBtn searchQuery={ex.s}/></div>))}</div>)}</div>);})}</div>)}</div>))}
-  </div>);
+/* ── WORKOUT DATA ────────────────────────────────────────── */
+const weeks = [
+  {
+    w:"Weeks 1–2", phase:"Foundation", color:C.greenLt,
+    goal:"Learn proper chest activation with light weights. Start knee PT protocol. Build the cardio habit.",
+    days:[
+      { day:"MON", name:"Chest Fat Burn A", emoji:"💪",
+        ex:"Flat DB Press 3×12 · DB Flyes 3×12 · Push-ups 3×15 · Incline DB Press 2×12. Squeeze chest 2s at top.",
+        mainUrl:YT.chestFat, mainLabel:"Chest Fat – 8 Dumbbell Exercises",
+        kneeUrl:YT.knee10, knee:"All on bench. Zero knee load." },
+      { day:"TUE", name:"Knee Rehab + Core", emoji:"🦵",
+        ex:"Straight leg raises 3×15 · Glute bridges 3×20 · Clamshells 3×15 · Wall sit 3×30s · Plank 3×30s · Dead bugs 3×12.",
+        mainUrl:YT.knee10, mainLabel:"10 Min Knee Strengthening – Physio PT",
+        kneeUrl:YT.knee3x, knee:"Pure PT protocol. No pain zone." },
+      { day:"WED", name:"Upper Body – Back & Shoulders", emoji:"🏋️",
+        ex:"DB Rows 3×12 · Shoulder Press 3×12 · Lateral Raises 3×12 · Bicep Curls 3×12 · Tricep Extensions 3×12.",
+        mainUrl:YT.upper15, mainLabel:"15 Min Upper Body – Arms, Back, Shoulders",
+        kneeUrl:YT.knee10, knee:"Seated or standing. Knee neutral." },
+      { day:"THU", name:"Chest Fat Burn B", emoji:"🔥",
+        ex:"DB Press 4×12 · Cable Chest Flyes 3×15 · Narrow Push-ups 3×15 · DB Pullover 3×12. Track weight used.",
+        mainUrl:YT.chestBuild, mainLabel:"20 Min Dumbbell Chest Build & Burn",
+        kneeUrl:YT.knee10, knee:"Flat bench only. Knee-safe." },
+      { day:"FRI", name:"Knee Strength + Core", emoji:"🦵",
+        ex:"Terminal knee extensions · Step touches · Seated leg raises 3×15 · Clamshells. Core: plank circuit 3×45s.",
+        mainUrl:YT.knee3x, mainLabel:"10 Min Knee Strength – 3×/Week Plan",
+        kneeUrl:YT.kneeRehab, knee:"Dedicated knee day — critical." },
+      { day:"SAT", name:"Full Upper Circuit", emoji:"⚡",
+        ex:"Giant set ×3 (no rest in set): DB Press + Rows + Shoulder Press + Curls + Triceps. 12 reps each, 90s between sets.",
+        mainUrl:YT.upper20, mainLabel:"20 Min Full Upper Body – MadFit",
+        kneeUrl:YT.knee10, knee:"Bench/seated throughout." },
+      { day:"SUN", name:"Active Recovery", emoji:"🌿",
+        ex:"30 min full-body stretch: chest opener, hip flexors, IT band, thoracic extension. Light walk optional.",
+        mainUrl:YT.mobility, mainLabel:"30 Min Full Flexibility & Mobility",
+        kneeUrl:YT.knee10, knee:"Gentle only. Zero pain." },
+    ],
+  },
+  {
+    w:"Weeks 3–4", phase:"Build", color:C.wood,
+    goal:"Increase chest volume. Add band resistance to knee work. Cardio pace increases. Weekly weigh-in every Monday.",
+    days:[
+      { day:"MON", name:"Chest Volume A", emoji:"💪",
+        ex:"DB Press 4×12 · Incline DB Press 4×12 · Chest Flyes 3×15 · Cable Crossover 3×15 · Push-ups to failure ×3. Beat W1-2 weight.",
+        mainUrl:YT.chestBuild, mainLabel:"20 Min Dumbbell Chest Build & Burn",
+        kneeUrl:YT.knee3x, knee:"All bench. Safe." },
+      { day:"TUE", name:"Knee Build + Core", emoji:"🦵",
+        ex:"Wall squats 3×30s (90° max) · Terminal extensions · Step-ups on low step 3×10 · Clamshells with band. Core plank series 3×45s.",
+        mainUrl:YT.knee3x, mainLabel:"10 Min Knee Strength – Build Phase",
+        kneeUrl:YT.kneeRehab, knee:"Wall squats strictly 90° max." },
+      { day:"WED", name:"Back & Shoulder Build", emoji:"🏋️",
+        ex:"DB Rows 4×12 · Arnold Press 3×12 · Face Pulls cable 3×15 · Lateral Raises 3×15 · Rear Delt Flyes 3×15.",
+        mainUrl:YT.upper15, mainLabel:"15 Min Upper Body Full Session",
+        kneeUrl:YT.knee10, knee:"Seated throughout." },
+      { day:"THU", name:"Chest Superset B", emoji:"🔥",
+        ex:"Superset ×4: DB Press + Chest Flyes — 12 reps each, 60s rest. Then 10 min core: leg raises · Russian twists · crunches.",
+        mainUrl:YT.chestFat, mainLabel:"Chest Fat – 8 Best Dumbbell Exercises",
+        kneeUrl:YT.knee10, knee:"Flat bench + mat core work." },
+      { day:"FRI", name:"Full Knee Rehab", emoji:"🦵",
+        ex:"20 min complete knee rehab: VMO activation · straight leg raises · standing terminal extensions · glute bridge progression.",
+        mainUrl:YT.kneeRehab, mainLabel:"20 Min Knee Rehab – Strength & Stability",
+        kneeUrl:YT.knee3x, knee:"Focus session. Critical week 3-4." },
+      { day:"SAT", name:"Arms + Chest Finisher", emoji:"💥",
+        ex:"Bicep Curls 4×12 · Hammer Curls 3×12 · Bench Dips 3×12 · Skull Crushers 3×12 · Chest drop set to failure.",
+        mainUrl:YT.upper20, mainLabel:"20 Min Full Upper Body – MadFit",
+        kneeUrl:YT.knee10, knee:"Bench dips only. No floor dips." },
+      { day:"SUN", name:"Chest Stretch + Mobility", emoji:"🌿",
+        ex:"Doorway chest stretch 3×60s · Pec minor release · Thoracic extension on bench · Full body 30 min stretch.",
+        mainUrl:YT.mobility, mainLabel:"30 Min Full Body Stretch & Mobility",
+        kneeUrl:YT.knee10, knee:"Gentle recovery." },
+    ],
+  },
+  {
+    w:"Weeks 5–6", phase:"Intensity", color:C.amber,
+    goal:"Heavier weights, shorter rest. Chest definition visible. Knee should feel notably stronger. Increase cardio incline & bike resistance.",
+    days:[
+      { day:"MON", name:"Chest Power A", emoji:"🏆",
+        ex:"Heavy DB Press 5×10 · Incline Press 4×12 · Cable Flyes 4×15 · Push-up variations 3×15. Beat W3-4 weight by 10-15%.",
+        mainUrl:YT.chestPeak, mainLabel:"25 Min Complete Chest – Build & Burn",
+        kneeUrl:YT.knee3x, knee:"Pure bench. Maximum chest." },
+      { day:"TUE", name:"Knee Power + Core", emoji:"🦵",
+        ex:"Shallow split squat 3×10 · Lateral band walks 3×20 · Terminal extensions w/ band · Step-ups 3×12 each leg. Core intense 10 min.",
+        mainUrl:YT.knee3x, mainLabel:"10 Min Knee Strength – Power Phase",
+        kneeUrl:YT.kneeRehab, knee:"Shallow split squat ONLY — no deep bend." },
+      { day:"WED", name:"Back Heavy Day", emoji:"💪",
+        ex:"Heavy DB Rows 5×10 · Overhead Press 4×12 · Upright Rows 3×12 · Rear Delt Flyes 3×15 · Face Pulls 4×15.",
+        mainUrl:YT.upper15, mainLabel:"15 Min Upper Body – Heavy Session",
+        kneeUrl:YT.knee10, knee:"Standing/seated. Knee neutral." },
+      { day:"THU", name:"Chest Power B + Abs", emoji:"🔥",
+        ex:"Drop set: 12 reps heavy → reduce weight → 10 more ×3. Cable crossover 4×15. 10 min intense abs follow-along.",
+        mainUrl:YT.chestPeak, mainLabel:"25 Min Complete Chest Workout",
+        kneeUrl:YT.knee10, knee:"Bench + cable only." },
+      { day:"FRI", name:"Knee + Full Core Burn", emoji:"🧘",
+        ex:"20 min knee rehab full session + glute bridge progression. Then 10 min core intense abs. 30 min functional total.",
+        mainUrl:YT.kneeRehab, mainLabel:"20 Min Knee Strength Rehab",
+        kneeUrl:YT.knee3x, knee:"Controlled. No sudden moves." },
+      { day:"SAT", name:"Upper Body Burnout", emoji:"⚡",
+        ex:"Giant set ×4 no rest: Chest Press + Rows + Shoulder Press + Curls + Triceps. Rest 2 min between giant sets.",
+        mainUrl:YT.upper20, mainLabel:"20 Min Full Upper Body Tone & Sculpt",
+        kneeUrl:YT.knee10, knee:"All seated or bench." },
+      { day:"SUN", name:"Deep Recovery", emoji:"🌿",
+        ex:"Foam roll chest & pecs · Pec stretch · Thoracic extension on bench · Full body 30 min mobility. Posture reset.",
+        mainUrl:YT.mobility, mainLabel:"30 Min Flexibility & Mobility",
+        kneeUrl:YT.knee10, knee:"Zero intensity. Pure recovery." },
+    ],
+  },
+  {
+    w:"Weeks 7–8", phase:"Peak", color:C.red,
+    goal:"Heaviest weights of the program. Maximum fat burn. Knees strong enough for slow controlled squats. Final push!",
+    days:[
+      { day:"MON", name:"Chest Peak A — PR Day", emoji:"🏅",
+        ex:"Max weight DB Press 4×8 · Incline Press 4×10 · Cable Flyes 4×15 · Push-ups to failure ×3. Chest on fire!",
+        mainUrl:YT.chestPeak, mainLabel:"25 Min Complete Chest – Peak Session",
+        kneeUrl:YT.knee3x, knee:"Pure bench. No knee." },
+      { day:"TUE", name:"Knee Mastery + Core Peak", emoji:"🦵",
+        ex:"Controlled squats 3×12 (90° max pain-free only) · Single-leg cable press · Step-ups w/ dumbbell 3×10 · Core 10 min peak.",
+        mainUrl:YT.kneeRehab, mainLabel:"20 Min Knee Rehab – Mastery Session",
+        kneeUrl:YT.knee3x, knee:"Controlled squats ONLY if pain-free." },
+      { day:"WED", name:"Back & Shoulders Peak", emoji:"💪",
+        ex:"PR rows 5×10 · Arnold Press 4×10 · Lateral Raises 4×15 · Cable Face Pulls 4×20. Beat W5-6 weights.",
+        mainUrl:YT.upper15, mainLabel:"15 Min Upper Body – Peak Session",
+        kneeUrl:YT.knee10, knee:"Standing/seated only." },
+      { day:"THU", name:"Chest Peak B — Burnout", emoji:"🔥",
+        ex:"100 total chest press reps any scheme · Flyes 4×15 · Cable crossover 4×15 · Incline push-ups 3×20.",
+        mainUrl:YT.chestFat, mainLabel:"Chest Fat Burn – 8 Best Exercises",
+        kneeUrl:YT.knee10, knee:"Bench and cable only." },
+      { day:"FRI", name:"Knee Final Test", emoji:"🧘",
+        ex:"All knee exercises from weeks 1–7 in sequence. See strength gain! Core 10 min intense finisher. 8-week assessment.",
+        mainUrl:YT.knee3x, mainLabel:"10 Min Knee Strength – Final Test",
+        kneeUrl:YT.kneeRehab, knee:"8-week knee progress check!" },
+      { day:"SAT", name:"Ultimate Upper Finale", emoji:"🏆",
+        ex:"Celebrate 8 weeks! Full upper body max effort — chest, back, shoulders, arms. Giant set ×5. Finish legendary.",
+        mainUrl:YT.upper20, mainLabel:"20 Min Full Upper Body – Final Session",
+        kneeUrl:YT.knee10, knee:"All bench/seated." },
+      { day:"SUN", name:"Transformation Day 🎉", emoji:"📸",
+        ex:"Take progress photos front/side/back! Measure waist, chest, hips. Compare to Day 1. Rest. Celebrate. You did it.",
+        mainUrl:YT.mobility, mainLabel:"Recovery & Mobility – You Earned It",
+        kneeUrl:YT.knee10, knee:"Rest day. Celebrate!" },
+    ],
+  },
+];
+
+const meals = [
+  {
+    type:"🌅 Breakfast", name:"Protein Overnight Oats",
+    cal:420, pro:32, carb:45, fat:10,
+    ings:["80g rolled oats","1 scoop vanilla whey protein","200ml unsweetened almond milk","1 tbsp chia seeds","100g mixed berries","1 tsp honey"],
+    how:"Mix oats, protein, chia and almond milk in jar. Refrigerate overnight. Top with berries and honey. 5 min prep — no cooking.",
+    vid:YT.oats,
+  },
+  {
+    type:"☀️ Lunch", name:"Grilled Chicken & Roasted Veggies",
+    cal:520, pro:48, carb:35, fat:14,
+    ings:["180g chicken breast","150g sweet potato cubed","100g broccoli florets","1 tbsp olive oil","Garlic, cumin, paprika","Juice of half lemon"],
+    how:"Season chicken with spices. Pan-sear 4 min each side until golden. Roast sweet potato and broccoli at 200°C for 20 min. Squeeze lemon.",
+    vid:YT.chicken,
+  },
+  {
+    type:"🌙 Dinner", name:"Baked Salmon & Asparagus",
+    cal:480, pro:42, carb:18, fat:22,
+    ings:["200g salmon fillet","1 bunch asparagus","1 tbsp olive oil","2 cloves garlic minced","Dill, salt, pepper","Half lemon sliced"],
+    how:"Drizzle salmon with olive oil, garlic, dill. Top with lemon slices. Asparagus alongside. Bake 190°C for 18–20 min until salmon flakes.",
+    vid:YT.salmon,
+  },
+  {
+    type:"🍎 Snacks (×2 daily)", name:"High-Protein Snack Pack",
+    cal:280, pro:28, carb:20, fat:8,
+    ings:["150g Greek yogurt 0% fat","1 medium apple","20g raw almonds","1 hard-boiled egg"],
+    how:"Prep night before. Morning: yogurt + apple. Pre-workout: egg + almonds. Simple, fast, 28g protein across both snacks.",
+    vid:YT.snack,
+  },
+];
+
+const quotes = [
+  { q:"Every rep you do when you don't want to is the one that changes your body.", a:"Your Future Self" },
+  { q:"The pain you feel today will be the strength you feel tomorrow.", a:"Arnold Schwarzenegger" },
+  { q:"You are not starting over. You are starting from experience.", a:"Transformation Truth" },
+  { q:"The gym is hard. Being unfit is hard. Choose your hard.", a:"Daily Reminder" },
+  { q:"Kaius is watching. Be the father who showed up.", a:"Your Greatest Why" },
+  { q:"Consistency beats perfection every single time.", a:"The Process" },
+];
+
+/* ── COMPONENTS ─────────────────────────────────────────── */
+function SectionLabel({ children }) {
+  return (
+    <div style={F.sLabel}>
+      <span>{children}</span>
+      <div style={F.sLine} />
+    </div>
+  );
 }
 
-function FoodView(){
-  const [open,setOpen]=useState(null);
-  const wMeals=meals.filter(m=>m.calories>0&&!m.meal.includes("Friday")&&!m.meal.includes("Saturday"));
-  const totCal=wMeals.reduce((a,m)=>a+m.calories,0);
-  const totProt=wMeals.reduce((a,m)=>a+m.protein,0);
-  const totCarb=wMeals.reduce((a,m)=>a+m.carbs,0);
-  const totFat=wMeals.reduce((a,m)=>a+m.fat,0);
-  return(<div>
-    <div style={{fontFamily:font.display,fontSize:"clamp(18px,3vw,22px)",fontWeight:"bold",color:C.textDark,marginBottom:"3px"}}>Meal Plan</div>
-    <div style={{fontFamily:font.body,fontSize:"12px",color:C.textMuted,marginBottom:"14px"}}>Dinner after gym 9:45pm - Videos open YouTube search for that exact recipe</div>
+function PBar({ pct, color }) {
+  return (
+    <div style={F.pBar}>
+      <div style={{ height:"100%", width:`${Math.min(pct,100)}%`,
+        borderRadius:"100px", background:color, transition:"width 0.7s ease" }} />
+    </div>
+  );
+}
 
-    <Card topColor={C.gold} style={{marginBottom:"14px",background:`linear-gradient(135deg,${C.gold}11,${C.bgCard})`}}>
-      <Divider label="Daily Meal Times"/>
-      {[{icon:"☕",time:"10:00am",name:"Breakfast",cal:480,desc:"Protein Oats + Eggs"},{icon:"🍎",time:"12:30pm",name:"Snack",cal:200,desc:"Greek Yogurt + Fruit"},{icon:"🍗",time:"2:00pm",name:"Lunch",cal:520,desc:"Chicken + Rice Cakes + Salad"},{icon:"🍌",time:"7:20pm",name:"Pre-Workout",cal:210,desc:"Banana + 2 Boiled Eggs ONLY"},{icon:"🌙",time:"9:45pm",name:"Dinner",cal:500,desc:"Salmon + Rice + Broccoli"}].map((m,i)=>(
-        <div key={i} style={{display:"flex",alignItems:"center",gap:"12px",padding:"8px 0",borderBottom:i<4?`1px solid ${C.border}`:"none"}}>
-          <div style={{fontSize:"20px"}}>{m.icon}</div>
-          <div style={{fontFamily:font.mono,fontSize:"12px",color:m.time==="7:20pm"||m.time==="9:45pm"?C.amber:C.gold,minWidth:"62px",fontWeight:"bold"}}>{m.time}</div>
-          <div style={{flex:1}}><div style={{fontFamily:font.display,fontWeight:"bold",fontSize:"13px",color:C.textDark}}>{m.name}</div><div style={{fontFamily:font.body,fontSize:"11px",color:C.textMuted}}>{m.desc}</div></div>
-          <div style={{fontFamily:font.mono,fontSize:"12px",color:C.walnut,fontWeight:"bold"}}>{m.cal}</div>
-        </div>
-      ))}
-      <div style={{background:`${C.amber}18`,border:`1px solid ${C.amber}55`,borderRadius:"8px",padding:"8px 12px",marginTop:"10px"}}><div style={{fontFamily:font.body,fontSize:"11px",color:C.mocha}}>Pre-workout at 7:20pm is banana and 2 eggs ONLY. Full dinner is AFTER gym at 9:45pm.</div></div>
-      <div style={{marginTop:"8px",background:`${C.fern}11`,borderRadius:"10px",padding:"10px 14px",border:`1px solid ${C.leafPale}`}}>
-        <div style={{display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
-          {[{l:"Total",v:totCal+" kcal",c:C.walnut},{l:"Protein",v:totProt+"g",c:C.fern},{l:"Deficit",v:"~"+(2800-totCal)+" kcal",c:C.caramel}].map((s,i)=>(<div key={i} style={{textAlign:"center"}}><div style={{fontFamily:font.display,fontWeight:"bold",fontSize:"15px",color:s.c}}>{s.v}</div><div style={{fontFamily:font.body,fontSize:"10px",color:C.textMuted}}>{s.l}</div></div>))}
-        </div>
-      </div>
-    </Card>
-
-    <Card topColor={C.fern} style={{marginBottom:"16px"}}>
-      <Divider label="Nutritional Breakdown"/>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"8px",marginBottom:"10px"}}>
-        {[{l:"Calories",v:totCal,suf:"kcal",c:C.walnut},{l:"Protein",v:totProt,suf:"g",c:C.fern},{l:"Carbs",v:totCarb,suf:"g",c:C.teal},{l:"Fat",v:totFat,suf:"g",c:C.caramel}].map((t,i)=>(<div key={i} style={{background:C.bgDeep,borderRadius:"10px",padding:"10px 6px",textAlign:"center",border:`1px solid ${C.border}`}}><div style={{fontFamily:font.display,fontSize:"16px",fontWeight:"bold",color:t.c}}>{t.v}</div><div style={{fontFamily:font.mono,fontSize:"9px",color:C.textLight}}>{t.suf}</div><div style={{fontFamily:font.body,fontSize:"9px",color:C.textMuted}}>{t.l}</div></div>))}
-      </div>
-      <Bar pct={(totProt/160)*100} color={C.fern} h={6}/>
-      <div style={{fontFamily:font.mono,fontSize:"10px",color:C.textMuted,marginTop:"3px",textAlign:"right"}}>{totProt}g protein / 160g target · deficit ~{2800-totCal} kcal/day</div>
-    </Card>
-
-    {meals.map((m,i)=>(
-      <div key={i} style={{background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:"18px",marginBottom:"12px",overflow:"hidden",boxShadow:"0 2px 10px rgba(90,55,20,0.08)",borderLeft:`4px solid ${m.meal==="Pre-Workout Snack"?C.amber:m.meal==="Dinner"?C.teal:m.meal==="Snack"?C.sage:m.meal.includes("Friday")||m.meal.includes("Saturday")?C.amber:C.wood}`}}>
-        <div style={{padding:"16px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"8px"}}>
-            <div>
-              <div style={{display:"flex",gap:"6px",alignItems:"center",marginBottom:"3px",flexWrap:"wrap"}}>
-                <span style={{fontFamily:font.body,fontSize:"10px",color:C.textLight,textTransform:"uppercase"}}>{m.icon} {m.meal}</span>
-                <span style={{fontFamily:font.mono,fontSize:"11px",color:C.gold,background:`${C.gold}22`,padding:"2px 10px",borderRadius:"20px",fontWeight:"bold"}}>{m.time}</span>
-              </div>
-              <div style={{fontFamily:font.display,fontWeight:"bold",fontSize:"15px",color:C.textDark}}>{m.name}</div>
-              <div style={{fontFamily:font.body,fontSize:"10px",color:C.blue,marginTop:"2px"}}>{m.tag}</div>
-              {m.brand&&<div style={{fontFamily:font.mono,fontSize:"10px",color:C.fern,marginTop:"4px",background:C.mintCream,display:"inline-block",padding:"2px 8px",borderRadius:"20px",border:`1px solid ${C.leafPale}`}}>🏷️ {m.brand}</div>}
-            </div>
-            {m.calories>0&&<div style={{textAlign:"right"}}><div style={{fontFamily:font.display,fontWeight:"bold",fontSize:"22px",color:C.walnut}}>{m.calories}</div><div style={{fontFamily:font.body,fontSize:"9px",color:C.textMuted}}>kcal</div></div>}
+function WeekBlock({ wk }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ ...F.card, padding:0, overflow:"hidden", marginBottom:"10px",
+      borderTop:`2px solid ${wk.color}` }}>
+      <button onClick={() => setOpen(!open)} style={{
+        width:"100%", background:"none", border:"none", cursor:"pointer",
+        padding:"16px 20px", display:"flex", justifyContent:"space-between",
+        alignItems:"center", textAlign:"left",
+      }}>
+        <div>
+          <div style={{ fontSize:"15px", fontWeight:"700", color:C.text }}>{wk.w}</div>
+          <div style={{ fontSize:"11px", color:wk.color, fontWeight:"600",
+            letterSpacing:"1.5px", textTransform:"uppercase", marginTop:"2px" }}>
+            {wk.phase} Phase
           </div>
-          <div style={{background:`${C.gold}18`,border:`1px solid ${C.gold}44`,borderRadius:"8px",padding:"6px 10px",marginBottom:"7px"}}><div style={{fontFamily:font.body,fontSize:"11px",color:C.mocha}}>🛒 {m.shopNote}</div></div>
-          <div style={{background:C.mintCream,border:`1px solid ${C.leafPale}`,borderRadius:"8px",padding:"7px 10px",marginBottom:"7px"}}><div style={{fontFamily:font.body,fontSize:"11px",color:C.fern}}>💡 {m.why}</div></div>
-          <div style={{background:`${C.blue}11`,border:`1px solid ${C.blue}33`,borderRadius:"8px",padding:"7px 10px",marginBottom:"10px"}}><div style={{fontFamily:font.body,fontSize:"11px",color:C.blue}}>⏱ {m.prepTip}</div></div>
-          {m.calories>0&&(<div style={{display:"flex",gap:"6px",marginBottom:"12px"}}>{[{l:"Protein",v:m.protein+"g",c:C.fern},{l:"Carbs",v:m.carbs+"g",c:C.teal},{l:"Fat",v:m.fat+"g",c:C.caramel}].map((mc,j)=>(<div key={j} style={{flex:1,background:C.bgDeep,borderRadius:"8px",padding:"6px 4px",textAlign:"center",border:`1px solid ${C.border}`}}><div style={{fontFamily:font.mono,fontSize:"13px",fontWeight:"bold",color:mc.c}}>{mc.v}</div><div style={{fontFamily:font.body,fontSize:"9px",color:C.textMuted}}>{mc.l}</div></div>))}</div>)}
-          <button onClick={()=>setOpen(open===i?null:i)} style={{width:"100%",background:C.bgDeep,border:`1px solid ${C.border}`,borderRadius:"8px",padding:"7px",color:C.textMuted,cursor:"pointer",fontFamily:font.body,fontSize:"11px",marginBottom:"10px"}}>{open===i?"Hide Recipe":"Show Ingredients and Recipe"}</button>
-          {open===i&&(<div style={{marginBottom:"12px"}}><div style={{fontFamily:font.display,fontWeight:"bold",color:C.fern,fontSize:"12px",marginBottom:"5px",textTransform:"uppercase"}}>Ingredients</div>{m.ingredients.map((ing,k)=>(<div key={k} style={{fontFamily:font.body,fontSize:"12px",color:C.textMid,padding:"2px 0"}}>- {ing}</div>))}<div style={{fontFamily:font.display,fontWeight:"bold",color:C.wood,fontSize:"12px",margin:"10px 0 5px",textTransform:"uppercase"}}>Method</div><div style={{fontFamily:font.body,fontSize:"12px",color:C.textMid,lineHeight:1.65}}>{m.instructions}</div></div>)}
-          <WatchBtn searchQuery={m.search}/>
         </div>
-      </div>
-    ))}
-  </div>);
+        <span style={{ color:C.textDim, fontSize:"18px",
+          transform:open?"rotate(180deg)":"none", display:"inline-block",
+          transition:"transform 0.2s" }}>▾</span>
+      </button>
+      {open && (
+        <div style={{ padding:"0 16px 16px" }}>
+          <div style={{ fontSize:"12px", color:C.textMid, marginBottom:"14px",
+            padding:"10px 14px", background:`${wk.color}0d`,
+            borderRadius:"8px", lineHeight:"1.6",
+            border:`1px solid ${wk.color}20` }}>
+            🎯 {wk.goal}
+          </div>
+          <CardioBlock />
+          {wk.days.map(d => (
+            <div key={d.day} style={{ ...F.card2, marginBottom:"8px" }}>
+              <div style={{ display:"flex", gap:"12px", flexWrap:"wrap" }}>
+                <span style={{ fontSize:"22px", flexShrink:0, marginTop:"2px" }}>{d.emoji}</span>
+                <div style={{ flex:1, minWidth:"180px" }}>
+                  <div style={{ display:"flex", gap:"8px", alignItems:"center",
+                    flexWrap:"wrap", marginBottom:"4px" }}>
+                    <span style={{ ...F.badge(wk.color), fontSize:"10px" }}>{d.day}</span>
+                    <span style={{ fontWeight:"700", fontSize:"14px", color:C.cream }}>{d.name}</span>
+                  </div>
+                  <p style={{ fontSize:"12px", color:C.textMid, margin:"0 0 4px",
+                    lineHeight:"1.6" }}>{d.ex}</p>
+                  <p style={{ fontSize:"11px", color:C.greenLt, margin:"0 0 10px" }}>
+                    🦵 {d.knee}
+                  </p>
+                  <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
+                    <a href={d.mainUrl} target="_blank" rel="noopener noreferrer"
+                      style={F.btn(`${wk.color}20`, wk.color, `1px solid ${wk.color}40`)}>
+                      ▶ {d.mainLabel}
+                    </a>
+                    <a href={d.kneeUrl} target="_blank" rel="noopener noreferrer"
+                      style={F.btn(`${C.greenLt}14`, C.greenLt, `1px solid ${C.greenLt}30`)}>
+                      🦵 Knee Video
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
-export default function PandoApp(){
-  const [view,setView]=useState("home");
-  const [logs,setLogs]=useState([]);
-  return(<div style={{minHeight:"100vh",background:C.bgPage,color:C.textDark,fontFamily:font.body}}>
-    <div style={{position:"fixed",inset:0,backgroundImage:"repeating-linear-gradient(90deg,transparent,transparent 80px,rgba(139,107,60,0.04) 80px,rgba(139,107,60,0.04) 81px)",pointerEvents:"none",zIndex:0}}/>
-    <div style={{position:"relative",zIndex:1,background:`linear-gradient(160deg,${C.fern} 0%,${C.moss} 60%,${C.bark} 100%)`,padding:"32px 20px 24px",textAlign:"center",overflow:"hidden"}}>
-      <div style={{position:"absolute",top:"-30px",left:"-30px",width:"140px",height:"140px",borderRadius:"50%",background:`${C.leafLight}22`,pointerEvents:"none"}}/>
-      <div style={{position:"absolute",bottom:"-20px",right:"-20px",width:"100px",height:"100px",borderRadius:"50%",background:`${C.latte}22`,pointerEvents:"none"}}/>
-      <div style={{display:"inline-block",background:`${C.latte}33`,border:`1px solid ${C.latteLight}66`,color:C.foam,fontWeight:"bold",fontSize:"10px",letterSpacing:"2.5px",padding:"4px 16px",borderRadius:"20px",marginBottom:"14px",textTransform:"uppercase",fontFamily:font.body}}>Warsan 4 - Akasya South</div>
-      <h1 style={{fontFamily:font.display,fontSize:"clamp(28px,7vw,52px)",fontWeight:"bold",margin:"0 0 4px",color:C.foam,letterSpacing:"1px"}}>PANDO APP</h1>
-      <p style={{fontFamily:font.display,fontSize:"clamp(13px,2.5vw,16px)",color:C.latteLight,margin:"0 0 4px",fontStyle:"italic"}}>2-Month Transformation - 105kg to 88kg</p>
-      <p style={{fontFamily:font.body,fontSize:"12px",color:`${C.foam}99`,margin:0}}>Dinner after gym 9:45pm - Evening Workout 8pm - Sun to Thu</p>
+function MealCard({ m, idx }) {
+  const [open, setOpen] = useState(false);
+  const cols = [C.wood, C.blue, C.greenLt, C.amber];
+  const col = cols[idx % cols.length];
+  return (
+    <div style={{ ...F.card, borderLeft:`3px solid ${col}`, paddingLeft:"18px" }}>
+      <div style={{ display:"flex", justifyContent:"space-between",
+        alignItems:"flex-start", gap:"12px", flexWrap:"wrap" }}>
+        <div>
+          <div style={{ fontSize:"10px", color:col, fontWeight:"700",
+            letterSpacing:"1.5px", textTransform:"uppercase", marginBottom:"4px" }}>{m.type}</div>
+          <div style={{ fontSize:"17px", fontWeight:"700", color:C.cream }}>{m.name}</div>
+        </div>
+        <div style={{ textAlign:"right" }}>
+          <div style={{ fontSize:"26px", fontWeight:"800", color:col, lineHeight:1 }}>{m.cal}</div>
+          <div style={{ fontSize:"10px", color:C.textDim, fontWeight:"600" }}>KCAL</div>
+        </div>
+      </div>
+      <div style={{ display:"flex", gap:"8px", flexWrap:"wrap", margin:"10px 0" }}>
+        {[[C.blue,"🥩 "+m.pro+"g protein"],[C.wood,"🌾 "+m.carb+"g carbs"],[C.green,"🥑 "+m.fat+"g fat"]].map(([c,t])=>(
+          <span key={t} style={F.badge(c)}>{t}</span>
+        ))}
+      </div>
+      <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
+        <button onClick={() => setOpen(!open)}
+          style={F.btn(`${col}14`, col, `1px solid ${col}30`)}>
+          {open ? "▲ Hide Recipe" : "▼ View Recipe"}
+        </button>
+        <a href={m.vid} target="_blank" rel="noopener noreferrer"
+          style={F.btn(`${C.blue}18`, C.blue, `1px solid ${C.blue}35`)}>
+          🎬 Watch Cooking Video
+        </a>
+      </div>
+      {open && (
+        <div style={{ borderTop:`1px solid ${C.border}`, paddingTop:"14px", marginTop:"14px" }}>
+          <div style={F.grid2}>
+            <div>
+              <div style={{ fontSize:"10px", color:C.wood, fontWeight:"700",
+                letterSpacing:"1.5px", textTransform:"uppercase", marginBottom:"8px" }}>Ingredients</div>
+              <ul style={{ margin:0, padding:"0 0 0 16px", color:C.textMid,
+                lineHeight:"2", fontSize:"13px" }}>
+                {m.ings.map((g,i) => <li key={i}>{g}</li>)}
+              </ul>
+            </div>
+            <div>
+              <div style={{ fontSize:"10px", color:C.blue, fontWeight:"700",
+                letterSpacing:"1.5px", textTransform:"uppercase", marginBottom:"8px" }}>How to Cook</div>
+              <p style={{ color:C.textMid, fontSize:"13px", lineHeight:"1.7", margin:0 }}>{m.how}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-    <div style={{position:"relative",zIndex:1,background:C.bgDark,borderBottom:`1px solid ${C.border}`,padding:"12px 14px"}}>
-      <div style={{display:"flex",gap:"10px",maxWidth:"720px",margin:"0 auto"}}>
-        <NavBtn label="Progress" icon="🌿" active={view==="home"} onClick={()=>setView("home")}/>
-        <NavBtn label="Workout" icon="🏋️" active={view==="workout"} onClick={()=>setView("workout")}/>
-        <NavBtn label="Food Plan" icon="☕" active={view==="food"} onClick={()=>setView("food")}/>
+  );
+}
+
+/* ── TABS DATA ───────────────────────────────────────────── */
+const TABS = [
+  { id:"progress", label:"🌿 Progress" },
+  { id:"workout",  label:"🏋️ Workout"  },
+  { id:"food",     label:"☕ Food Plan" },
+];
+
+/* ── LOCALSTORAGE HOOK ──────────────────────────────────── */
+function useStored(key, def) {
+  const [val, setVal] = useState(() => {
+    if (typeof window === "undefined") return def;
+    try {
+      const raw = localStorage.getItem(key);
+      return raw !== null ? JSON.parse(raw) : def;
+    } catch { return def; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(key, JSON.stringify(val)); }
+    catch {}
+  }, [key, val]);
+  return [val, setVal];
+}
+
+/* ── MAIN PAGE ───────────────────────────────────────────── */
+export default function PandoApp() {
+  const [tab, setTab] = useState("progress");
+
+  // Persisted across refreshes
+  const [weight, setWeight] = useStored("pando_weight", "");
+  const [steps,  setSteps]  = useStored("pando_steps",  "");
+  const [water,  setWater]  = useStored("pando_water",  "");
+  const [sleep,  setSleep]  = useStored("pando_sleep",  "");
+  const [logs,   setLogs]   = useStored("pando_logs",   []);
+  const [quoteIdx, setQuoteIdx] = useStored("pando_quote", 0);
+  const [logInput, setLogInput] = useState({ date:"", session:"", notes:"" });
+
+  const START = 105, GOAL = 88;
+  const cur  = parseFloat(weight) || START;
+  const lost = Math.max(0, START - cur);
+  const toGo = Math.max(0, cur - GOAL);
+  const wPct  = Math.min(100, (lost / (START - GOAL)) * 100);
+  const sPct  = Math.min(100, ((parseFloat(steps)||0) / 10000) * 100);
+  const waPct = Math.min(100, ((parseFloat(water)||0) / 3) * 100);
+  const slPct = Math.min(100, ((parseFloat(sleep)||0) / 8) * 100);
+  const behind = weight && cur > START - 0.5;
+
+  // Derived stats from log history
+  const totalSessions = logs.length;
+  const avgStepsPct   = logs.length > 0
+    ? Math.min(100, sPct)
+    : 0;
+
+  function addLog() {
+    if (!logInput.date || !logInput.session) return;
+    setLogs(prev => [{ ...logInput, id: Date.now() }, ...prev]);
+    setLogInput({ date:"", session:"", notes:"" });
+  }
+
+  function deleteLog(id) {
+    setLogs(prev => prev.filter(l => l.id !== id));
+  }
+
+  function clearAll() {
+    if (!window.confirm("Reset ALL progress data? This cannot be undone.")) return;
+    setWeight(""); setSteps(""); setWater(""); setSleep(""); setLogs([]);
+  }
+
+  return (
+    <div style={F.page}>
+      {/* HEADER */}
+      <div style={F.header}>
+        <div style={F.headerGlow} />
+        <div style={F.pill}>☕ Wood · Latte · Wellness</div>
+        <h1 style={F.title}>PANDO APP</h1>
+        <p style={F.subtitle}>2-Month Transformation · 105kg → 88kg</p>
+        <p style={{ fontSize:"11px", color:C.textDim, margin:"0 0 12px",
+          letterSpacing:"1px" }}>
+          8 Weeks · Knee-Safe · 176cm · Work 10am–7pm
+        </p>
+        <div style={F.statRow}>
+          {[
+            ["105kg","Start Weight"],["88kg","Goal Weight"],
+            ["2200kcal","Daily Target"],["7:30 AM","Workout Time"],
+          ].map(([v,l]) => (
+            <div key={l} style={F.statBox}>
+              <div style={{ fontSize:"16px", fontWeight:"800", color:C.woodLight }}>{v}</div>
+              <div style={{ fontSize:"10px", color:C.textDim, marginTop:"2px",
+                letterSpacing:"1px", textTransform:"uppercase" }}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* TABS */}
+      <div style={F.tabs}>
+        {TABS.map(t => (
+          <button key={t.id} style={F.tab(tab===t.id)} onClick={() => setTab(t.id)}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div style={F.wrap}>
+
+        {/* ── PROGRESS TAB ── */}
+        {tab === "progress" && (
+          <div>
+            {/* Body Analysis */}
+            <SectionLabel>Body Analysis — Start Point</SectionLabel>
+            <div style={F.woodCard}>
+              <p style={{ fontSize:"13px", color:C.textMid, margin:"0 0 14px",
+                lineHeight:"1.7" }}>
+                Based on your photos: primary fat in <strong style={{ color:C.woodLight }}>abdomen,
+                chest, lower back &amp; flanks</strong>. Good broad shoulder frame underneath.
+                All workouts use your <strong style={{ color:C.woodLight }}>treadmill, elliptical,
+                bike, cable machine, dumbbells &amp; bench</strong>. Zero jumping. Zero deep squats.
+              </p>
+              <div style={F.grid3}>
+                {[["2200kcal","Daily Calories"],["219g","Daily Protein"],
+                  ["7:30 AM","Workout Time"],["45–60 min","Duration"]].map(([v,l]) => (
+                  <div key={l} style={{ textAlign:"center", padding:"12px",
+                    background:C.card, borderRadius:"10px", border:`1px solid ${C.border}` }}>
+                    <div style={{ fontSize:"20px", fontWeight:"800", color:C.wood }}>{v}</div>
+                    <div style={{ fontSize:"10px", color:C.textDim, marginTop:"4px",
+                      textTransform:"uppercase", letterSpacing:"1px" }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Your Profile */}
+            <SectionLabel>Your Profile</SectionLabel>
+            <div style={F.grid3}>
+              {[
+                ["105kg","Start Weight",""],
+                [`${cur.toFixed(1)}kg`,"Current Weight", cur < START ? C.greenLt : C.latte],
+                ["176cm","Height",""],
+                [`${lost.toFixed(1)}kg`,"Total Lost", lost > 0 ? C.greenLt : C.textDim],
+                [`${toGo.toFixed(1)}kg`,"Still To Go", toGo < 5 ? C.greenLt : C.amber],
+                [`${wPct.toFixed(0)}%`,"Goal Done", wPct > 50 ? C.greenLt : C.wood],
+                [`${totalSessions}`,"Sessions Logged", totalSessions > 0 ? C.woodLight : C.textDim],
+                ["88kg","Target Weight",""],
+              ].map(([v,l,col]) => (
+                <div key={l} style={{ ...F.card, padding:"14px", textAlign:"center" }}>
+                  <div style={{ fontSize:"18px", fontWeight:"800", color: col || C.latte }}>{v}</div>
+                  <div style={{ fontSize:"10px", color:C.textDim, marginTop:"3px",
+                    textTransform:"uppercase", letterSpacing:"1px" }}>{l}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Live Tracker */}
+            <SectionLabel>Live Daily Tracker</SectionLabel>
+            <div style={F.grid2}>
+              {[
+                { label:"Current Weight (kg)", val:weight, set:setWeight, ph:"e.g. 104.5" },
+                { label:"Daily Steps",         val:steps,  set:setSteps,  ph:"e.g. 8500"  },
+                { label:"Water Intake (L)",     val:water,  set:setWater,  ph:"e.g. 2.5"   },
+                { label:"Sleep Hours",          val:sleep,  set:setSleep,  ph:"e.g. 7.5"   },
+              ].map(f => (
+                <div key={f.label} style={F.card}>
+                  <label style={F.inputLabel}>{f.label}</label>
+                  <input type="number" value={f.val} placeholder={f.ph}
+                    onChange={e => f.set(e.target.value)} style={F.input} />
+                </div>
+              ))}
+            </div>
+
+            {behind && (
+              <div style={F.redCard}>
+                <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"8px" }}>
+                  <span style={{ fontSize:"20px" }}>⚠️</span>
+                  <span style={{ fontWeight:"700", color:"#e87070", fontSize:"14px" }}>
+                    Weight Loss Behind Schedule</span>
+                </div>
+                <p style={{ color:"#d09090", margin:0, fontSize:"13px", lineHeight:"1.6" }}>
+                  Target: 0.5–1 kg/week. Check calorie deficit, increase daily steps,
+                  and ensure the full 40-min cardio block is completed every session.
+                </p>
+              </div>
+            )}
+
+            <div style={F.card}>
+              <div style={{ fontSize:"13px", fontWeight:"700", color:C.cream, marginBottom:"14px" }}>
+                Overall Progress
+              </div>
+              {[
+                { label:"⚖️ Weight Goal", pct:wPct,  color:`linear-gradient(90deg,${C.wood},${C.woodLight})` },
+                { label:"👟 Daily Steps", pct:sPct,  color:`linear-gradient(90deg,${C.blue},#7ab0d8)` },
+                { label:"💧 Water Intake",pct:waPct, color:`linear-gradient(90deg,#4a9aaa,#7abbc8)` },
+                { label:"😴 Sleep",       pct:slPct, color:`linear-gradient(90deg,#7a5aaa,#9a7ac8)` },
+              ].map(p => (
+                <div key={p.label} style={{ marginBottom:"14px" }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"4px" }}>
+                    <span style={{ fontSize:"12px", color:C.textMid }}>{p.label}</span>
+                    <span style={{ fontSize:"12px", color:p.pct>=100?C.greenLt:C.latte, fontWeight:"700" }}>
+                      {p.pct.toFixed(0)}%
+                    </span>
+                  </div>
+                  <PBar pct={p.pct} color={p.color} />
+                </div>
+              ))}
+            </div>
+
+            {/* Workout Log */}
+            <SectionLabel>Workout Log Sheet</SectionLabel>
+            <div style={F.card}>
+              <div style={F.grid3}>
+                <div>
+                  <label style={F.inputLabel}>Date</label>
+                  <input type="date" value={logInput.date}
+                    onChange={e => setLogInput(p => ({...p, date:e.target.value}))}
+                    style={F.input} />
+                </div>
+                <div>
+                  <label style={F.inputLabel}>Session</label>
+                  <input type="text" value={logInput.session}
+                    placeholder="e.g. Chest Day + Cardio"
+                    onChange={e => setLogInput(p => ({...p, session:e.target.value}))}
+                    style={F.input} />
+                </div>
+                <div>
+                  <label style={F.inputLabel}>Notes</label>
+                  <input type="text" value={logInput.notes}
+                    placeholder="e.g. 12kg DB press"
+                    onChange={e => setLogInput(p => ({...p, notes:e.target.value}))}
+                    style={F.input} />
+                </div>
+              </div>
+              <button onClick={addLog}
+                style={{ ...F.btn(`linear-gradient(135deg,${C.wood},${C.woodDark})`, "#000"), marginTop:"12px" }}>
+                + Log Session
+              </button>
+            </div>
+
+            {/* Log summary bar */}
+            {logs.length > 0 && (
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center",
+                padding:"10px 16px", background:C.card2, borderRadius:"10px",
+                border:`1px solid ${C.border}`, marginBottom:"10px" }}>
+                <div style={{ fontSize:"12px", color:C.textMid }}>
+                  <span style={{ color:C.woodLight, fontWeight:"700" }}>{logs.length}</span>
+                  {" "}session{logs.length !== 1 ? "s" : ""} logged &nbsp;·&nbsp;
+                  <span style={{ color:C.greenLt, fontWeight:"700" }}>
+                    {Math.round((logs.length / 56) * 100)}%
+                  </span> of 8-week plan complete
+                </div>
+                <button onClick={clearAll}
+                  style={{ ...F.btn("rgba(192,80,74,0.12)", C.red, "1px solid rgba(192,80,74,0.25)"),
+                    fontSize:"11px", padding:"5px 10px" }}>
+                  🗑 Reset All
+                </button>
+              </div>
+            )}
+
+            {logs.length === 0 ? (
+              <div style={{ textAlign:"center", padding:"24px", color:C.textDim, fontSize:"13px" }}>
+                🌱 No workouts logged yet.<br />
+                <span style={{ fontSize:"12px" }}>Log your first session above — it saves automatically!</span>
+              </div>
+            ) : (
+              <div>
+                {logs.map(lg => (
+                  <div key={lg.id} style={{ ...F.card2, display:"flex",
+                    justifyContent:"space-between", alignItems:"center", gap:"12px",
+                    borderLeft:`3px solid ${C.greenDim}` }}>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:"11px", color:C.textDim }}>{lg.date}</div>
+                      <div style={{ fontWeight:"700", color:C.cream, fontSize:"14px", marginTop:"2px" }}>{lg.session}</div>
+                      {lg.notes && <div style={{ fontSize:"12px", color:C.textMid, marginTop:"2px" }}>{lg.notes}</div>}
+                    </div>
+                    <div style={{ display:"flex", alignItems:"center", gap:"8px", flexShrink:0 }}>
+                      <span style={{ fontSize:"18px" }}>✅</span>
+                      <button onClick={() => deleteLog(lg.id)}
+                        style={{ ...F.btn("rgba(192,80,74,0.10)", C.red, "1px solid rgba(192,80,74,0.2)"),
+                          fontSize:"11px", padding:"4px 9px" }}>
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Knee Safety */}
+            <SectionLabel>Knee Safety Protocol</SectionLabel>
+            <div style={F.redCard}>
+              <div style={F.grid3}>
+                {[
+                  { icon:"🚫", rule:"No Deep Squats",   detail:"Nothing below 90°", col:C.red },
+                  { icon:"🚫", rule:"No Jumping",        detail:"Zero impact moves",  col:C.red },
+                  { icon:"🚫", rule:"Stop Sharp Pain",   detail:"Rest & ice at once", col:C.red },
+                  { icon:"✅", rule:"Elliptical First",  detail:"Zero joint impact",  col:C.greenLt },
+                  { icon:"✅", rule:"Incline Walk",      detail:"Knee-safe cardio",   col:C.greenLt },
+                  { icon:"✅", rule:"Ice After Session", detail:"10–15 min ice pack", col:C.greenLt },
+                ].map(k => (
+                  <div key={k.rule} style={{ padding:"12px",
+                    background: k.icon==="✅"?"rgba(90,138,90,0.08)":"rgba(192,80,74,0.06)",
+                    borderRadius:"10px", border:`1px solid ${k.col}25` }}>
+                    <div style={{ fontSize:"20px", marginBottom:"4px" }}>{k.icon}</div>
+                    <div style={{ fontWeight:"700", color:k.col, fontSize:"13px" }}>{k.rule}</div>
+                    <div style={{ fontSize:"11px", color:C.textDim, marginTop:"2px" }}>{k.detail}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Motivation Quote */}
+            <SectionLabel>Daily Motivation</SectionLabel>
+            <div style={F.woodCard}>
+              <div style={{ fontSize:"24px", marginBottom:"10px", textAlign:"center" }}>💬</div>
+              <p style={{ fontSize:"15px", fontStyle:"italic", color:C.cream,
+                lineHeight:"1.7", textAlign:"center", margin:"0 0 12px" }}>
+                "{quotes[quoteIdx].q}"
+              </p>
+              <p style={{ textAlign:"center", fontSize:"12px", color:C.wood,
+                fontWeight:"700", letterSpacing:"1px", textTransform:"uppercase", margin:"0 0 14px" }}>
+                — {quotes[quoteIdx].a}
+              </p>
+              <div style={{ textAlign:"center" }}>
+                <button onClick={() => setQuoteIdx((quoteIdx + 1) % quotes.length)}
+                  style={F.btn(`${C.greenLt}18`, C.greenLt, `1px solid ${C.greenLt}35`)}>
+                  🌿 Next Quote
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── WORKOUT TAB ── */}
+        {tab === "workout" && (
+          <div>
+            <SectionLabel>Daily Cardio Structure</SectionLabel>
+            <div style={F.greenCard}>
+              <div style={{ fontWeight:"700", color:C.greenLt, fontSize:"15px", marginBottom:"14px" }}>
+                🔥 40 Minutes — Fixed Every Training Day
+              </div>
+              <div style={F.grid3}>
+                {[
+                  { icon:"🚴", label:"Step 1 — Bike", time:"10 min",
+                    detail:"Medium resistance. Warm knee joint safely.", col:C.blue, url:YT.bike10 },
+                  { icon:"🔄", label:"Step 2 — Elliptical", time:"10 min",
+                    detail:"Full-body glide. Zero knee impact. Fat-burn zone.", col:"#9a7ac8", url:YT.ellip10 },
+                  { icon:"🏔️", label:"Step 3 — Incline Walk", time:"20 min",
+                    detail:"6–10% incline. Max calorie afterburn.", col:C.greenLt, url:YT.incline20 },
+                ].map(st => (
+                  <div key={st.label} style={{ background:`${st.col}12`,
+                    border:`1px solid ${st.col}30`, borderRadius:"12px", padding:"16px" }}>
+                    <div style={{ fontSize:"22px", marginBottom:"6px" }}>{st.icon}</div>
+                    <div style={{ fontWeight:"700", color:st.col, fontSize:"13px" }}>{st.label}</div>
+                    <div style={{ fontSize:"22px", fontWeight:"800", color:C.cream,
+                      margin:"4px 0", letterSpacing:"-0.5px" }}>{st.time}</div>
+                    <div style={{ fontSize:"11px", color:C.textDim, marginBottom:"10px",
+                      lineHeight:"1.5" }}>{st.detail}</div>
+                    <a href={st.url} target="_blank" rel="noopener noreferrer"
+                      style={F.btn(`${st.col}20`, st.col, `1px solid ${st.col}40`)}>
+                      ▶ Follow Along
+                    </a>
+                  </div>
+                ))}
+              </div>
+              <div style={{ fontSize:"12px", color:C.textDim, lineHeight:"1.7",
+                padding:"12px 14px", marginTop:"12px",
+                background:"rgba(201,147,58,0.05)", borderRadius:"8px",
+                border:`1px solid rgba(201,147,58,0.12)` }}>
+                <strong style={{ color:C.wood }}>Why this sequence:</strong> Bike warms the knee safely first.
+                Elliptical raises heart rate without joint stress. Incline walk targets belly &amp; chest fat
+                and strengthens the VMO muscle around the knee. This 40-min block is your
+                <strong style={{ color:C.cream }}> daily fat furnace</strong>.
+              </div>
+            </div>
+
+            <SectionLabel>8-Week Plan — Chest Focus + Knee Rehab</SectionLabel>
+            <div style={F.woodCard}>
+              <p style={{ margin:0, color:C.textMid, fontSize:"13px", lineHeight:"1.7" }}>
+                <strong style={{ color:C.woodLight }}>🎯 Chest Priority:</strong> Monday &amp; Thursday
+                every week are dedicated chest sessions — DB press, flyes, cable crossover — to burn
+                chest fat and build pec definition.&nbsp;
+                <strong style={{ color:C.greenLt }}>🦵 Knee Priority:</strong> Tuesday, Friday +
+                Sunday use physical therapy protocols — VMO activation, glute bridges, terminal knee
+                extensions — to make your knees pain-free and strong.
+              </p>
+            </div>
+            {weeks.map(w => <WeekBlock key={w.w} wk={w} />)}
+          </div>
+        )}
+
+        {/* ── FOOD TAB ── */}
+        {tab === "food" && (
+          <div>
+            <SectionLabel>Daily Nutrition Targets</SectionLabel>
+            <div style={F.woodCard}>
+              <div style={{ display:"flex", justifyContent:"space-around",
+                flexWrap:"wrap", gap:"16px" }}>
+                {[["1,700",C.wood,"Calories"],["150g",C.blue,"Protein"],
+                  ["118g",C.greenLt,"Carbs"],["54g",C.amber,"Fats"]].map(([v,c,l]) => (
+                  <div key={l} style={{ textAlign:"center", minWidth:"70px" }}>
+                    <div style={{ fontSize:"clamp(22px,5vw,30px)", fontWeight:"800", color:c }}>{v}</div>
+                    <div style={{ fontSize:"10px", color:C.textDim, textTransform:"uppercase",
+                      letterSpacing:"1px", marginTop:"3px" }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <SectionLabel>Meal Plan</SectionLabel>
+            {meals.map((m, i) => <MealCard key={m.name} m={m} idx={i} />)}
+
+            <SectionLabel>Nutrition Rules</SectionLabel>
+            <div style={F.card}>
+              <div style={F.grid2}>
+                {[
+                  { icon:"🥩", text:"Protein first at every meal — chicken, salmon, eggs, Greek yogurt" },
+                  { icon:"💧", text:"Drink 3L water daily — start with 500ml before breakfast" },
+                  { icon:"⏰", text:"Eat breakfast within 60 min of waking to kickstart metabolism" },
+                  { icon:"🚫", text:"Avoid rice, bread, pasta, sugary drinks and fried foods" },
+                  { icon:"🌙", text:"Last meal 2–3 hours before sleep for optimal fat burning" },
+                  { icon:"📏", text:"Use a food scale for the first 2 weeks — accuracy matters" },
+                ].map(r => (
+                  <div key={r.text} style={{ display:"flex", gap:"10px", alignItems:"flex-start",
+                    padding:"12px", background:C.card2, borderRadius:"9px",
+                    border:`1px solid ${C.border}` }}>
+                    <span style={{ fontSize:"16px", flexShrink:0 }}>{r.icon}</span>
+                    <span style={{ fontSize:"12px", color:C.textMid, lineHeight:"1.5" }}>{r.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* FOOTER */}
+      <div style={{ textAlign:"center", padding:"20px",
+        borderTop:`1px solid ${C.border}`, color:C.textDim, fontSize:"11px",
+        letterSpacing:"1px" }}>
+        PANDO APP 🌿 &nbsp;·&nbsp; Personalised for you &nbsp;·&nbsp; Stay consistent &nbsp;·&nbsp; Trust the process
       </div>
     </div>
-    <div style={{position:"relative",zIndex:1,maxWidth:"720px",margin:"0 auto",padding:"18px 14px 80px"}}>
-      {view==="home"&&<HomeView logs={logs}/>}
-      {view==="workout"&&<WorkoutView onLog={e=>setLogs(p=>[...p,e])} logs={logs}/>}
-      {view==="food"&&<FoodView/>}
-    </div>
-    <div style={{position:"relative",zIndex:1,textAlign:"center",padding:"20px 0 32px",borderTop:`1px solid ${C.border}`,background:C.bgDark}}>
-      <div style={{fontFamily:font.display,fontSize:"14px",color:C.wood,fontWeight:"bold"}}>PANDO APP - Warsan 4 Dubai</div>
-      <div style={{fontFamily:font.body,fontSize:"11px",color:C.textLight,marginTop:"3px"}}>Dinner after gym - Simple food - Built for your life</div>
-    </div>
-  </div>);
+  );
 }
